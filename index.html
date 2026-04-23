@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>Past Master - When vs While</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background-color: #0f172a; /* Fallback */
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+
+        .animate-bounce-custom {
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes pulse-heart {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .heart-active {
+            color: #ef4444;
+            fill: #ef4444;
+            animation: pulse-heart 1.5s infinite;
+        }
+
+        .heart-inactive {
+            color: #d1d5db;
+            fill: none;
+        }
+
+        /* Prevent text selection to feel more like an app */
+        .no-select {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="no-select text-slate-800">
+
+    <!-- DECORATIVE BACKGROUNDS -->
+    <div id="bg-decorations" class="hidden">
+        <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-indigo-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div class="fixed bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-pink-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    </div>
+
+    <!-- WELCOME SCREEN -->
+    <div id="welcome-screen" class="min-h-screen w-full bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 flex flex-col items-center justify-center p-6 text-white absolute inset-0 z-10 transition-opacity duration-300 overflow-y-auto">
+        
+        <div class="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-8 w-full max-w-6xl z-10 my-auto">
+            
+            <!-- LEFT PANEL: Main Game Start -->
+            <div class="max-w-2xl w-full text-center space-y-8 p-8 md:p-10 bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 animate-fade-in-up flex flex-col justify-center">
+                <div class="inline-block p-4 bg-gradient-to-tr from-pink-500 to-orange-400 rounded-full shadow-lg mx-auto w-max">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 drop-shadow-sm">
+                    Past Master
+                </h1>
+                <h2 class="text-2xl md:text-3xl font-semibold text-indigo-200">
+                    When vs. While
+                </h2>
+                <p class="text-lg text-gray-300 max-w-md mx-auto hidden md:block">
+                    Master the Simple Past and Past Continuous. Over 100+ unique exercises!
+                </p>
+
+                <div class="max-w-sm mx-auto w-full mt-4 mb-4 relative">
+                    <input type="text" id="player-name" placeholder="Enter your name to start..." class="w-full px-6 py-4 rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-inner" maxlength="20">
+                    <p id="name-error" class="hidden text-red-300 font-semibold mt-2 drop-shadow-md">Please enter your name!</p>
+                </div>
+
+                <button onclick="startGame()" class="group relative px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
+                    <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:animate-pulse"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>Start Learning</span>
+                </button>
+            </div>
+
+            <!-- RIGHT PANEL: Mini Leaderboard -->
+            <div class="w-full lg:w-80 bg-black/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/10 animate-fade-in-up p-6 flex flex-col relative overflow-hidden" style="animation-delay: 0.1s;">
+                <div class="absolute top-0 right-0 p-16 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                
+                <h3 class="text-amber-400 font-black text-2xl mb-6 flex items-center justify-center space-x-2 border-b border-white/10 pb-4 relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                    <span>Top 3 Masters</span>
+                </h3>
+                
+                <div id="mini-leaderboard-list" class="space-y-3 text-sm flex-1 relative z-10">
+                    <p class="text-gray-400 text-center mt-8">Loading top players...</p>
+                </div>
+                
+                <button onclick="showLeaderboard('welcome-screen')" class="mt-6 w-full py-4 bg-indigo-600/30 hover:bg-indigo-600/50 rounded-2xl text-indigo-200 hover:text-white text-sm md:text-base font-bold transition-all border border-indigo-400/30 relative z-10 shadow-lg">
+                    View Full Global Leaderboard
+                </button>
+            </div>
+
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="mt-6 lg:absolute lg:bottom-4 text-center w-full text-white/50 text-sm font-medium tracking-wide">
+            Developed by: Hugo Luque
+        </div>
+    </div>
+
+    <!-- COUNTDOWN SCREEN -->
+    <div id="countdown-screen" class="hidden min-h-screen w-full bg-slate-900 flex items-center justify-center text-white absolute inset-0 z-20">
+        <div class="text-center">
+            <h1 id="countdown-text" class="text-9xl md:text-[12rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 animate-bounce-custom drop-shadow-[0_0_30px_rgba(74,222,128,0.5)]">
+                3
+            </h1>
+        </div>
+    </div>
+
+    <!-- PLAYING SCREEN -->
+    <div id="playing-screen" class="hidden min-h-screen w-full bg-slate-50 flex flex-col absolute inset-0 z-10 overflow-y-auto">
+        
+        <!-- Header -->
+        <header class="w-full bg-white shadow-sm p-4 flex justify-between items-center z-10 sticky top-0">
+            <div class="flex items-center space-x-2">
+                <div id="level-display" class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full font-black text-lg shadow-inner">
+                    Level 1
+                </div>
+            </div>
+
+            <button onclick="stopGame()" class="text-gray-400 hover:text-red-500 transition-colors p-2" title="Stop Game">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </button>
+
+            <div class="flex items-center space-x-6">
+                <div id="hearts-container" class="flex items-center space-x-1">
+                    <!-- Hearts generated by JS -->
+                </div>
+                <div class="text-2xl font-black text-slate-700">
+                    <span id="score-display">0</span> <span class="text-sm font-medium text-slate-500">PTS</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Timer Bar -->
+        <div class="w-full bg-slate-200 h-2 z-10 relative">
+            <div id="timer-bar" class="bg-gradient-to-r from-green-400 to-emerald-500 h-2 transition-all duration-100 ease-linear" style="width: 100%"></div>
+        </div>
+        <div class="w-full text-center absolute top-20 z-10 pointer-events-none">
+            <span id="timer-text" class="text-xl font-black text-slate-400 drop-shadow-sm hidden">15s</span>
+        </div>
+
+        <!-- Main Game Area -->
+        <main class="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-4xl mx-auto relative z-0">
+            
+            <!-- Feedback Overlay -->
+            <div id="feedback-overlay" class="hidden absolute inset-0 z-20 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl transition-opacity duration-200">
+                <h2 id="feedback-text" class="text-6xl md:text-8xl font-black drop-shadow-xl animate-bounce-custom text-center">
+                    Wow!
+                </h2>
+            </div>
+
+            <!-- Question Card -->
+            <div id="question-card" class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-slate-100 p-6 md:p-10 flex flex-col relative overflow-hidden hidden">
+                
+                <div class="flex items-start justify-between mb-8 md:mb-12">
+                    <h2 id="question-text" class="text-3xl md:text-5xl font-bold leading-tight text-slate-800 flex-1">
+                        <!-- Question injected by JS -->
+                    </h2>
+                    <button onclick="playCurrentAudio()" class="ml-4 p-4 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 hover:scale-110 transition-all shadow-sm active:scale-95 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
+                    <!-- Buttons injected by JS -->
+                </div>
+
+                <!-- Hint Section -->
+                <div class="mt-8 flex flex-col items-center border-t border-slate-100 pt-6 min-h-[80px]">
+                    <button id="show-hint-btn" onclick="showHint()" class="flex items-center space-x-2 text-amber-500 hover:text-amber-600 font-medium px-4 py-2 rounded-full hover:bg-amber-50 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line></svg>
+                        <span>Show Hint</span>
+                    </button>
+                    
+                    <div id="hint-content" class="hidden bg-amber-50 text-amber-800 p-4 rounded-xl flex items-start space-x-3 w-full max-w-2xl animate-fade-in-up">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 mt-1 text-amber-500"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line></svg>
+                        <p id="hint-text" class="text-lg"></p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- GAMEOVER SCREEN -->
+    <div id="gameover-screen" class="hidden min-h-screen w-full bg-gradient-to-br from-red-900 via-gray-900 to-black flex items-center justify-center p-6 text-white absolute inset-0 z-30">
+        <div class="max-w-md w-full text-center space-y-6 p-8 bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-red-500/30 animate-fade-in-up">
+            <h1 class="text-5xl font-black text-red-500 drop-shadow-md">Game Over</h1>
+            <p class="text-2xl text-gray-300">Level Reached: <span id="final-level" class="font-bold text-white">1</span></p>
+            <p class="text-2xl text-gray-300">Final Score: <span id="final-score" class="font-bold text-white">0</span></p>
+            <p class="text-xl text-gray-400">Total Time Alive: <span id="final-time" class="font-bold text-white">0</span>s</p>
+            
+            <button onclick="showLeaderboard('gameover-screen')" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform active:scale-95 flex items-center justify-center space-x-2 mt-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"></path><path d="M5 20V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"></path><path d="M9 20V12h6v8"></path></svg>
+                <span>View Leaderboard</span>
+            </button>
+
+            <button onclick="startGame()" class="mt-4 w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform active:scale-95 flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                <span>Play Again</span>
+            </button>
+            <button onclick="stopGame()" class="w-full py-4 bg-gray-700/50 hover:bg-gray-700 rounded-2xl font-bold text-xl shadow-lg transition-colors flex items-center justify-center space-x-2">
+                <span>Main Menu</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD SCREEN -->
+    <div id="leaderboard-screen" class="hidden min-h-screen w-full bg-slate-900 flex flex-col items-center justify-center p-6 text-white absolute inset-0 z-40 overflow-y-auto">
+        <div class="max-w-2xl w-full space-y-6 p-8 bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 animate-fade-in-up mt-10 mb-10">
+            <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-md text-center">Top 10 Leaderboard</h1>
+            
+            <div class="bg-black/30 rounded-2xl overflow-hidden mt-6">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/10 text-gray-300 text-sm md:text-base uppercase tracking-wider">
+                            <th class="p-4 border-b border-white/10">Rank</th>
+                            <th class="p-4 border-b border-white/10">Name</th>
+                            <th class="p-4 border-b border-white/10 text-center">Score</th>
+                            <th class="p-4 border-b border-white/10 text-right">Time (s)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-list" class="text-base md:text-lg">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="flex justify-center mt-8">
+                <button id="lb-back-btn" onclick="switchScreen('welcome-screen')" class="w-full md:w-1/2 py-4 bg-gray-600 hover:bg-gray-500 rounded-2xl font-bold text-xl shadow-lg transition-colors flex items-center justify-center space-x-2">
+                    <span>Back</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE INIT ---
+        let app, auth, db, currentUser;
+        let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            if (Object.keys(firebaseConfig).length > 0) {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+
+                onAuthStateChanged(auth, user => {
+                    currentUser = user;
+                    window.loadMiniLeaderboard();
+                });
+            } else {
+                window.loadMiniLeaderboard();
+            }
+        } catch (e) {
+            console.warn("Firebase not initialized correctly. Leaderboard will run locally.", e);
+            window.loadMiniLeaderboard();
+        }
+
+        // --- DATA ---
+        const CAs = [
+            { text: "I ___ TV", correct: "was watching", distractors: ["watched", "am watching", "watch"] },
+            { text: "she ___ a shower", correct: "was taking", distractors: ["took", "is taking", "takes"] },
+            { text: "they ___ soccer", correct: "were playing", distractors: ["played", "play", "are playing"] },
+            { text: "we ___ dinner", correct: "were having", distractors: ["had", "have", "are having"] },
+            { text: "he ___ a book", correct: "was reading", distractors: ["read", "reads", "is reading"] },
+            { text: "the dog ___", correct: "was sleeping", distractors: ["slept", "sleeps", "is sleeping"] },
+            { text: "I ___ to work", correct: "was driving", distractors: ["drove", "drive", "am driving"] },
+            { text: "we ___ for the exam", correct: "were studying", distractors: ["studied", "study", "are studying"] },
+            { text: "she ___ to music", correct: "was listening", distractors: ["listened", "listens", "is listening"] },
+            { text: "they ___ in the park", correct: "were walking", distractors: ["walked", "walk", "are walking"] },
+            { text: "he ___ the car", correct: "was fixing", distractors: ["fixed", "fixes", "is fixing"] },
+            { text: "I ___ for the bus", correct: "was waiting", distractors: ["waited", "wait", "am waiting"] },
+            { text: "the kids ___", correct: "were laughing", distractors: ["laughed", "laugh", "are laughing"] },
+            { text: "she ___ a letter", correct: "was writing", distractors: ["wrote", "writes", "is writing"] },
+            { text: "we ___ the house", correct: "were cleaning", distractors: ["cleaned", "clean", "are cleaning"] },
+            { text: "he ___ on the phone", correct: "was talking", distractors: ["talked", "talks", "is talking"] },
+            { text: "I ___ about my future", correct: "was thinking", distractors: ["thought", "think", "am thinking"] },
+            { text: "they ___ a movie", correct: "were making", distractors: ["made", "make", "are making"] },
+            { text: "she ___ a cake", correct: "was baking", distractors: ["baked", "bakes", "is baking"] },
+            { text: "we ___ along the beach", correct: "were running", distractors: ["ran", "run", "are running"] }
+        ];
+
+        const IAs = [
+            { text: "the phone ___", correct: "rang", distractors: ["was ringing", "rings", "has rung"] },
+            { text: "the power ___ out", correct: "went", distractors: ["was going", "goes", "has gone"] },
+            { text: "it ___ to rain", correct: "started", distractors: ["was starting", "starts", "has started"] },
+            { text: "someone ___ on the door", correct: "knocked", distractors: ["was knocking", "knocks", "has knocked"] },
+            { text: "I ___ a strange noise", correct: "heard", distractors: ["was hearing", "hear", "has heard"] },
+            { text: "the alarm ___ off", correct: "went", distractors: ["was going", "goes", "has gone"] },
+            { text: "a bird ___ into the room", correct: "flew", distractors: ["was flying", "flies", "has flown"] },
+            { text: "she ___ her keys", correct: "dropped", distractors: ["was dropping", "drops", "has dropped"] },
+            { text: "the teacher ___ in", correct: "walked", distractors: ["was walking", "walks", "has walked"] },
+            { text: "I ___ a shooting star", correct: "saw", distractors: ["was seeing", "see", "has seen"] },
+            { text: "my friend ___ me", correct: "called", distractors: ["was calling", "calls", "has called"] },
+            { text: "the baby ___ up", correct: "woke", distractors: ["was waking", "wakes", "has woken"] },
+            { text: "a dog ___ loudly", correct: "barked", distractors: ["was barking", "barks", "has barked"] },
+            { text: "the computer ___", correct: "crashed", distractors: ["was crashing", "crashes", "has crashed"] },
+            { text: "we ___ a loud explosion", correct: "heard", distractors: ["were hearing", "hear", "have heard"] },
+            { text: "he ___ his finger", correct: "cut", distractors: ["was cutting", "cuts", "has cut"] },
+            { text: "the glass ___", correct: "broke", distractors: ["was breaking", "breaks", "has broken"] },
+            { text: "she ___ down", correct: "fell", distractors: ["was falling", "falls", "has fallen"] },
+            { text: "a car ___ outside", correct: "stopped", distractors: ["was stopping", "stops", "has stopped"] },
+            { text: "I ___ a brilliant idea", correct: "had", distractors: ["was having", "have", "has had"] }
+        ];
+
+        const feedbackSuccess = ["Wow!", "Excellent!", "You are a genius!", "Good job!", "Wonderful!", "Amazing!", "Spectacular!", "Outstanding!", "Brilliant!"];
+        const feedbackFail = ["What a pity!", "Wrong!", "Try again!", "Oops!", "Not quite!", "Oh no!", "Keep trying!", "Time's up!"];
+
+        // --- STATE VARIABLES ---
+        let playerName = "";
+        let score = 0;
+        let lives = 5;
+        let level = 1;
+        let currentQ = null;
+        let isProcessing = false;
+
+        // Timer Vars
+        let questionTimeLimit = 15;
+        let currentTimer = 15;
+        let timerInterval = null;
+        let totalTimeAlive = 0;
+        let questionStartTime = 0;
+
+        let leaderboardData = []; // Cache
+
+        // Load voices early
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
+        }
+
+        // --- CORE FUNCTIONS ---
+        function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+        function shuffleArray(array) { return array.sort(() => Math.random() - 0.5); }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        window.playCurrentAudio = function() {
+            if (!currentQ) return;
+            const textToRead = currentQ.questionText.replace("___", "blank");
+            speak(textToRead);
+        }
+
+        window.switchScreen = function(screenId) {
+            ['welcome-screen', 'countdown-screen', 'playing-screen', 'gameover-screen', 'leaderboard-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+
+            if(screenId === 'playing-screen'){
+                document.getElementById('bg-decorations').classList.remove('hidden');
+            } else {
+                document.getElementById('bg-decorations').classList.add('hidden');
+            }
+        }
+
+        function requestFullScreen() {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) docElm.requestFullscreen().catch(err => console.log("Fullscreen error:", err));
+        }
+
+        function exitFullScreen() {
+            if (document.fullscreenElement) document.exitFullscreen().catch(err => console.log("Exit fullscreen error:", err));
+        }
+
+        // --- GAME LOGIC ---
+        function generateRandomQuestion() {
+            const ca = CAs[Math.floor(Math.random() * CAs.length)];
+            const ia = IAs[Math.floor(Math.random() * IAs.length)];
+            const patternType = Math.floor(Math.random() * 8);
+
+            const caFull = ca.text.replace("___", ca.correct);
+            const iaFull = ia.text.replace("___", ia.correct);
+            
+            let questionText = "", answer = "", distractors = [], hint = "";
+
+            switch (patternType) {
+                case 0: questionText = `${capitalize(caFull)} when ${ia.text}.`; answer = ia.correct; distractors = ia.distractors; hint = "We use the Simple Past after 'when' for a short action that interrupts."; break;
+                case 1: questionText = `${capitalize(ca.text)} when ${iaFull}.`; answer = ca.correct; distractors = ca.distractors; hint = "We use the Past Continuous for the longer background action that was in progress."; break;
+                case 2: questionText = `While ${ca.text}, ${iaFull}.`; answer = ca.correct; distractors = ca.distractors; hint = "We use the Past Continuous directly after 'while' for an ongoing action."; break;
+                case 3: questionText = `While ${caFull}, ${ia.text}.`; answer = ia.correct; distractors = ia.distractors; hint = "The action that interrupts the 'while' clause is usually in the Simple Past."; break;
+                case 4: questionText = `${capitalize(iaFull)} while ${ca.text}.`; answer = ca.correct; distractors = ca.distractors; hint = "We use the Past Continuous directly after 'while' for an ongoing action."; break;
+                case 5: questionText = `${capitalize(ia.text)} while ${caFull}.`; answer = ia.correct; distractors = ia.distractors; hint = "The shorter action that happens during the 'while' clause is in the Simple Past."; break;
+                case 6: questionText = `When ${ia.text}, ${caFull}.`; answer = ia.correct; distractors = ia.distractors; hint = "We use the Simple Past directly after 'when' for an interrupting event."; break;
+                case 7: questionText = `When ${iaFull}, ${ca.text}.`; answer = ca.correct; distractors = ca.distractors; hint = "The longer background action separated from 'when' is in the Past Continuous."; break;
+            }
+
+            const options = shuffleArray([answer, ...distractors]);
+            return { questionText, answer, options, hint };
+        }
+
+        window.startGame = function() {
+            playerName = document.getElementById('player-name').value.trim();
+            if (!playerName) {
+                document.getElementById('name-error').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('name-error').classList.add('hidden');
+
+            if ('speechSynthesis' in window) {
+                const silent = new SpeechSynthesisUtterance('');
+                silent.volume = 0;
+                window.speechSynthesis.speak(silent);
+            }
+            
+            requestFullScreen();
+
+            score = 0;
+            lives = 5;
+            level = 1;
+            totalTimeAlive = 0;
+            updateUI();
+
+            window.switchScreen('countdown-screen');
+            let countdown = 3;
+            const textEl = document.getElementById('countdown-text');
+            textEl.innerText = countdown;
+            speak(countdown.toString());
+
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    textEl.innerText = countdown;
+                    speak(countdown.toString());
+                } else if (countdown === 0) {
+                    textEl.innerText = "GO!";
+                    speak("Go!");
+                } else {
+                    clearInterval(interval);
+                    window.switchScreen('playing-screen');
+                    loadNewQuestion();
+                }
+            }, 1000);
+        }
+
+        window.stopGame = function() {
+            clearInterval(timerInterval);
+            exitFullScreen();
+            window.switchScreen('welcome-screen');
+            window.speechSynthesis.cancel();
+        }
+
+        function renderHearts() {
+            const container = document.getElementById('hearts-container');
+            container.innerHTML = '';
+            for(let i = 0; i < 5; i++) {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '28');
+                svg.setAttribute('height', '28');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('stroke', 'currentColor');
+                svg.setAttribute('stroke-width', '2');
+                svg.setAttribute('stroke-linecap', 'round');
+                svg.setAttribute('stroke-linejoin', 'round');
+                
+                if (i < lives) svg.setAttribute('class', 'heart-active');
+                else svg.setAttribute('class', 'heart-inactive');
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z');
+                svg.appendChild(path);
+                container.appendChild(svg);
+            }
+        }
+
+        function updateUI() {
+            level = Math.floor(score / 10) + 1;
+            document.getElementById('level-display').innerText = `Level ${level}`;
+            document.getElementById('score-display').innerText = score;
+            renderHearts();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            questionTimeLimit = Math.max(5, 15 - (level - 1) * 1.5); // Gets faster each level
+            currentTimer = questionTimeLimit;
+            questionStartTime = Date.now();
+            
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.width = '100%';
+            timerBar.className = 'bg-gradient-to-r from-green-400 to-emerald-500 h-2 transition-all duration-100 ease-linear';
+
+            timerInterval = setInterval(() => {
+                if (isProcessing) return;
+                
+                const elapsed = (Date.now() - questionStartTime) / 1000;
+                currentTimer = questionTimeLimit - elapsed;
+                
+                if (currentTimer <= 0) {
+                    currentTimer = 0;
+                    clearInterval(timerInterval);
+                    timerBar.style.width = '0%';
+                    handleTimeout();
+                } else {
+                    const percentage = (currentTimer / questionTimeLimit) * 100;
+                    timerBar.style.width = percentage + '%';
+                    
+                    if (percentage < 30) {
+                        timerBar.className = 'bg-gradient-to-r from-red-500 to-pink-600 h-2 transition-all duration-100 ease-linear';
+                    } else if (percentage < 60) {
+                        timerBar.className = 'bg-gradient-to-r from-amber-400 to-orange-500 h-2 transition-all duration-100 ease-linear';
+                    }
+                }
+            }, 50);
+        }
+
+        function stopAndRecordTime() {
+            clearInterval(timerInterval);
+            const elapsed = (Date.now() - questionStartTime) / 1000;
+            totalTimeAlive += Math.min(elapsed, questionTimeLimit);
+        }
+
+        function loadNewQuestion() {
+            currentQ = generateRandomQuestion();
+            isProcessing = false;
+            
+            const parts = currentQ.questionText.split('___');
+            const qContainer = document.getElementById('question-text');
+            qContainer.innerHTML = '';
+            
+            parts.forEach((part, index) => {
+                qContainer.appendChild(document.createTextNode(part));
+                if (index < parts.length - 1) {
+                    const span = document.createElement('span');
+                    span.className = 'inline-block mx-2 w-32 md:w-48 border-b-4 border-indigo-400 align-baseline';
+                    qContainer.appendChild(span);
+                }
+            });
+
+            const optContainer = document.getElementById('options-container');
+            optContainer.innerHTML = '';
+            currentQ.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full py-5 px-6 rounded-2xl text-xl md:text-2xl font-semibold transition-all duration-200 shadow-sm border-2 bg-white border-slate-200 text-slate-700 hover:border-indigo-400 hover:shadow-md hover:text-indigo-600 hover:scale-[1.02] active:scale-[0.98] cursor-pointer';
+                btn.innerText = option;
+                btn.onclick = () => window.handleAnswer(option, btn);
+                optContainer.appendChild(btn);
+            });
+
+            document.getElementById('show-hint-btn').classList.remove('hidden');
+            document.getElementById('hint-content').classList.add('hidden');
+            document.getElementById('hint-text').innerText = currentQ.hint;
+            document.getElementById('question-card').classList.remove('hidden');
+
+            startTimer();
+
+            setTimeout(() => { window.playCurrentAudio(); }, 500);
+        }
+
+        window.showHint = function() {
+            document.getElementById('show-hint-btn').classList.add('hidden');
+            document.getElementById('hint-content').classList.remove('hidden');
+        }
+
+        window.handleAnswer = function(selectedOption, buttonElement) {
+            if (isProcessing) return;
+            isProcessing = true;
+            stopAndRecordTime();
+
+            const buttons = document.getElementById('options-container').querySelectorAll('button');
+            buttons.forEach(b => {
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+                b.classList.remove('hover:scale-[1.02]', 'active:scale-[0.98]', 'cursor-pointer');
+            });
+
+            const isCorrect = selectedOption === currentQ.answer;
+            const overlay = document.getElementById('feedback-overlay');
+            const feedbackText = document.getElementById('feedback-text');
+
+            if (isCorrect) {
+                const msg = feedbackSuccess[Math.floor(Math.random() * feedbackSuccess.length)];
+                feedbackText.innerText = msg;
+                feedbackText.className = "text-6xl md:text-8xl font-black drop-shadow-xl animate-bounce-custom text-center text-green-500";
+                overlay.classList.remove('hidden');
+                speak(msg);
+                
+                score++;
+                updateUI();
+                
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    document.getElementById('question-card').classList.add('hidden');
+                    loadNewQuestion();
+                }, 2000);
+
+            } else {
+                const msg = feedbackFail[Math.floor(Math.random() * (feedbackFail.length - 1))]; // Exclude "Time's up!"
+                feedbackText.innerText = msg;
+                feedbackText.className = "text-6xl md:text-8xl font-black drop-shadow-xl animate-bounce-custom text-center text-red-500";
+                overlay.classList.remove('hidden');
+                speak(msg);
+                
+                lives--;
+                updateUI();
+                
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    if (lives <= 0) gameOver();
+                    else {
+                        document.getElementById('question-card').classList.add('hidden');
+                        loadNewQuestion();
+                    }
+                }, 2000);
+            }
+        }
+
+        function handleTimeout() {
+            if (isProcessing) return;
+            isProcessing = true;
+            stopAndRecordTime();
+            
+            const buttons = document.getElementById('options-container').querySelectorAll('button');
+            buttons.forEach(b => {
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+                b.classList.remove('hover:scale-[1.02]', 'active:scale-[0.98]', 'cursor-pointer');
+            });
+
+            const msg = "Time's up!";
+            const overlay = document.getElementById('feedback-overlay');
+            const feedbackText = document.getElementById('feedback-text');
+            
+            feedbackText.innerText = msg;
+            feedbackText.className = "text-6xl md:text-8xl font-black drop-shadow-xl animate-bounce-custom text-center text-red-500";
+            overlay.classList.remove('hidden');
+            speak(msg);
+            
+            lives--;
+            updateUI();
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                if (lives <= 0) gameOver();
+                else {
+                    document.getElementById('question-card').classList.add('hidden');
+                    loadNewQuestion();
+                }
+            }, 2000);
+        }
+
+        async function gameOver() {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-level').innerText = level;
+            document.getElementById('final-time').innerText = totalTimeAlive.toFixed(1);
+            
+            window.switchScreen('gameover-screen');
+            speak("Game Over. You did your best!");
+
+            const newRecord = {
+                name: playerName,
+                score: score,
+                timeAlive: parseFloat(totalTimeAlive.toFixed(1)),
+                timestamp: Date.now()
+            };
+
+            if (currentUser && db) {
+                try {
+                    const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                    await addDoc(lbRef, newRecord);
+                } catch (e) {
+                    console.error("Failed to save score", e);
+                    leaderboardData.push(newRecord);
+                }
+            } else {
+                leaderboardData.push(newRecord);
+            }
+            
+            // Actualizar mini leaderboard después de jugar
+            window.loadMiniLeaderboard();
+        }
+
+        window.loadMiniLeaderboard = async function() {
+            const miniList = document.getElementById('mini-leaderboard-list');
+            if (!miniList) return;
+            
+            let data = [];
+            if (currentUser && db) {
+                try {
+                    const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                    const snapshot = await getDocs(lbRef);
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                } catch (e) {
+                    console.error("Failed to fetch leaderboard", e);
+                    data = [...leaderboardData];
+                }
+            } else {
+                data = [...leaderboardData];
+            }
+
+            data.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.timeAlive - a.timeAlive;
+            });
+            
+            leaderboardData = data;
+            
+            const top3 = data.slice(0, 3);
+            miniList.innerHTML = '';
+            
+            if (top3.length === 0) {
+                miniList.innerHTML = '<p class="text-gray-400 text-center mt-4">No records yet! Be the first!</p>';
+                return;
+            }
+
+            top3.forEach((row, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-white/5 px-4 py-3 rounded-xl border border-white/5';
+                
+                const isTop1 = index === 0 ? 'text-yellow-400 font-bold' : 'text-gray-200';
+                
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3 truncate">
+                        <span class="${isTop1} text-lg">#${index + 1}</span>
+                        <span class="font-medium truncate max-w-[120px] text-left text-base">${row.name}</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-indigo-300 font-bold text-sm">${row.score} pts</span>
+                        <span class="text-gray-400 text-xs">${row.timeAlive}s</span>
+                    </div>
+                `;
+                miniList.appendChild(div);
+            });
+        }
+
+        window.showLeaderboard = async function(returnScreen = 'welcome-screen') {
+            document.getElementById('lb-back-btn').onclick = () => window.switchScreen(returnScreen);
+            window.switchScreen('leaderboard-screen');
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">Loading...</td></tr>';
+            
+            let data = [];
+            if (currentUser && db) {
+                try {
+                    const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                    const snapshot = await getDocs(lbRef);
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                } catch (e) {
+                    console.error("Failed to fetch leaderboard", e);
+                    data = [...leaderboardData];
+                }
+            } else {
+                data = [...leaderboardData];
+            }
+
+            // Sort: highest score, then highest time alive
+            data.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.timeAlive - a.timeAlive;
+            });
+            
+            leaderboardData = data;
+            
+            const top10 = data.slice(0, 10);
+            listEl.innerHTML = '';
+            
+            if (top10.length === 0) {
+                listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No records yet!</td></tr>';
+                return;
+            }
+
+            top10.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
+                
+                const isTop1 = index === 0 ? 'text-yellow-400 font-black text-2xl drop-shadow-md' : '';
+                const isTop2 = index === 1 ? 'text-gray-300 font-bold text-xl' : '';
+                const isTop3 = index === 2 ? 'text-amber-600 font-bold text-xl' : '';
+
+                tr.innerHTML = `
+                    <td class="p-4 ${isTop1 || isTop2 || isTop3}">#${index + 1}</td>
+                    <td class="p-4 font-bold truncate max-w-[120px] md:max-w-[200px]">${row.name}</td>
+                    <td class="p-4 text-center font-black text-indigo-300">${row.score}</td>
+                    <td class="p-4 text-right text-gray-400">${row.timeAlive}s</td>
+                `;
+                listEl.appendChild(tr);
+            });
+        }
+
+        // Initialize display
+        renderHearts();
+    </script>
+</body>
+</html>
