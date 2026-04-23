@@ -91,11 +91,16 @@
                     <p id="name-error" class="hidden text-red-300 font-semibold mt-2 drop-shadow-md">Please enter your name!</p>
                 </div>
 
-                <button onclick="startGame()" class="group relative px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
-                    <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:animate-pulse"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    <span>Start Learning</span>
-                </button>
+                <div class="flex flex-col items-center space-y-4">
+                    <button onclick="startGame()" class="group relative px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
+                        <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:animate-pulse"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <span>Start Learning</span>
+                    </button>
+                    <p class="text-white/50 text-sm font-medium tracking-wide">
+                        Developed by: Hugo Luque
+                    </p>
+                </div>
             </div>
 
             <!-- RIGHT PANEL: Mini Leaderboard -->
@@ -108,7 +113,7 @@
                 </h3>
                 
                 <div id="mini-leaderboard-list" class="space-y-3 text-sm flex-1 relative z-10">
-                    <p class="text-gray-400 text-center mt-8">Loading top players...</p>
+                    <p class="text-gray-400 text-center mt-8">Loading live records...</p>
                 </div>
                 
                 <button onclick="showLeaderboard('welcome-screen')" class="mt-6 w-full py-4 bg-indigo-600/30 hover:bg-indigo-600/50 rounded-2xl text-indigo-200 hover:text-white text-sm md:text-base font-bold transition-all border border-indigo-400/30 relative z-10 shadow-lg">
@@ -116,11 +121,6 @@
                 </button>
             </div>
 
-        </div>
-        
-        <!-- FOOTER -->
-        <div class="mt-6 lg:absolute lg:bottom-4 text-center w-full text-white/50 text-sm font-medium tracking-wide">
-            Developed by: Hugo Luque
         </div>
     </div>
 
@@ -236,7 +236,7 @@
     <!-- LEADERBOARD SCREEN -->
     <div id="leaderboard-screen" class="hidden min-h-screen w-full bg-slate-900 flex flex-col items-center justify-center p-6 text-white absolute inset-0 z-40 overflow-y-auto">
         <div class="max-w-2xl w-full space-y-6 p-8 bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 animate-fade-in-up mt-10 mb-10">
-            <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-md text-center">Top 10 Leaderboard</h1>
+            <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-md text-center">Live Top 10 Leaderboard</h1>
             
             <div class="bg-black/30 rounded-2xl overflow-hidden mt-6">
                 <table class="w-full text-left border-collapse">
@@ -250,6 +250,7 @@
                     </thead>
                     <tbody id="leaderboard-list" class="text-base md:text-lg">
                         <!-- Filled by JS -->
+                        <tr><td colspan="4" class="text-center p-4 text-gray-400">Loading live records...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -266,38 +267,30 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- FIREBASE INIT ---
+        // --- GLOBAL VARIABLES ---
         let app, auth, db, currentUser;
         let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            if (Object.keys(firebaseConfig).length > 0) {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
+        let playerName = "";
+        let score = 0;
+        let lives = 5;
+        let level = 1;
+        let currentQ = null;
+        let isProcessing = false;
 
-                onAuthStateChanged(auth, user => {
-                    currentUser = user;
-                    window.loadMiniLeaderboard();
-                });
-            } else {
-                window.loadMiniLeaderboard();
-            }
-        } catch (e) {
-            console.warn("Firebase not initialized correctly. Leaderboard will run locally.", e);
-            window.loadMiniLeaderboard();
+        let questionTimeLimit = 15;
+        let currentTimer = 15;
+        let timerInterval = null;
+        let totalTimeAlive = 0;
+        let questionStartTime = 0;
+
+        let leaderboardData = []; // Main Cache
+        let unsubscribeLeaderboard = null;
+
+        // Load voices early
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
         }
 
         // --- DATA ---
@@ -349,28 +342,6 @@
 
         const feedbackSuccess = ["Wow!", "Excellent!", "You are a genius!", "Good job!", "Wonderful!", "Amazing!", "Spectacular!", "Outstanding!", "Brilliant!"];
         const feedbackFail = ["What a pity!", "Wrong!", "Try again!", "Oops!", "Not quite!", "Oh no!", "Keep trying!", "Time's up!"];
-
-        // --- STATE VARIABLES ---
-        let playerName = "";
-        let score = 0;
-        let lives = 5;
-        let level = 1;
-        let currentQ = null;
-        let isProcessing = false;
-
-        // Timer Vars
-        let questionTimeLimit = 15;
-        let currentTimer = 15;
-        let timerInterval = null;
-        let totalTimeAlive = 0;
-        let questionStartTime = 0;
-
-        let leaderboardData = []; // Cache
-
-        // Load voices early
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.getVoices();
-        }
 
         // --- CORE FUNCTIONS ---
         function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
@@ -703,131 +674,151 @@
                 timestamp: Date.now()
             };
 
+            // Real-Time Firebase Save
             if (currentUser && db) {
                 try {
                     const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
                     await addDoc(lbRef, newRecord);
+                    // It will be updated automatically via the Real-Time Listener (onSnapshot)
                 } catch (e) {
-                    console.error("Failed to save score", e);
-                    leaderboardData.push(newRecord);
+                    console.error("Failed to save score online", e);
+                    fallbackLocalSave(newRecord);
                 }
             } else {
-                leaderboardData.push(newRecord);
+                fallbackLocalSave(newRecord);
             }
-            
-            // Actualizar mini leaderboard después de jugar
-            window.loadMiniLeaderboard();
         }
 
-        window.loadMiniLeaderboard = async function() {
-            const miniList = document.getElementById('mini-leaderboard-list');
-            if (!miniList) return;
-            
-            let data = [];
-            if (currentUser && db) {
-                try {
-                    const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-                    const snapshot = await getDocs(lbRef);
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
-                } catch (e) {
-                    console.error("Failed to fetch leaderboard", e);
-                    data = [...leaderboardData];
-                }
-            } else {
-                data = [...leaderboardData];
-            }
-
-            data.sort((a, b) => {
+        function fallbackLocalSave(newRecord) {
+            leaderboardData.push(newRecord);
+            leaderboardData.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
-                return b.timeAlive - a.timeAlive;
+                return a.timeAlive - b.timeAlive; // Lower time is better on ties
             });
-            
-            leaderboardData = data;
-            
-            const top3 = data.slice(0, 3);
-            miniList.innerHTML = '';
-            
-            if (top3.length === 0) {
-                miniList.innerHTML = '<p class="text-gray-400 text-center mt-4">No records yet! Be the first!</p>';
-                return;
-            }
+            updateLeaderboardUI();
+        }
 
-            top3.forEach((row, index) => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center bg-white/5 px-4 py-3 rounded-xl border border-white/5';
+        // --- REAL-TIME LEADERBOARD LOGIC ---
+        function subscribeToLeaderboard() {
+            if (!currentUser || !db) return;
+            const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            
+            if (unsubscribeLeaderboard) unsubscribeLeaderboard();
+            
+            // Listen to live database changes!
+            unsubscribeLeaderboard = onSnapshot(lbRef, (snapshot) => {
+                let data = [];
+                snapshot.forEach(doc => data.push(doc.data()));
                 
-                const isTop1 = index === 0 ? 'text-yellow-400 font-bold' : 'text-gray-200';
+                // Sort Rule: 1) Highest Score 2) Lowest Time
+                data.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return a.timeAlive - b.timeAlive;
+                });
                 
-                div.innerHTML = `
-                    <div class="flex items-center space-x-3 truncate">
-                        <span class="${isTop1} text-lg">#${index + 1}</span>
-                        <span class="font-medium truncate max-w-[120px] text-left text-base">${row.name}</span>
-                    </div>
-                    <div class="flex flex-col items-end">
-                        <span class="text-indigo-300 font-bold text-sm">${row.score} pts</span>
-                        <span class="text-gray-400 text-xs">${row.timeAlive}s</span>
-                    </div>
-                `;
-                miniList.appendChild(div);
+                leaderboardData = data;
+                updateLeaderboardUI();
+            }, (error) => {
+                console.error("Realtime leaderboard sync failed:", error);
             });
         }
 
-        window.showLeaderboard = async function(returnScreen = 'welcome-screen') {
+        function updateLeaderboardUI() {
+            // Update Mini Leaderboard on Welcome Screen
+            const miniList = document.getElementById('mini-leaderboard-list');
+            if (miniList) {
+                const top3 = leaderboardData.slice(0, 3);
+                miniList.innerHTML = '';
+                if (top3.length === 0) {
+                    miniList.innerHTML = '<p class="text-gray-400 text-center mt-4">No records yet! Be the first!</p>';
+                } else {
+                    top3.forEach((row, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'flex justify-between items-center bg-white/5 px-4 py-3 rounded-xl border border-white/5';
+                        const isTop1 = index === 0 ? 'text-yellow-400 font-bold' : 'text-gray-200';
+                        
+                        div.innerHTML = `
+                            <div class="flex items-center space-x-3 truncate">
+                                <span class="${isTop1} text-lg">#${index + 1}</span>
+                                <span class="font-medium truncate max-w-[120px] text-left text-base">${row.name}</span>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-indigo-300 font-bold text-sm">${row.score} pts</span>
+                                <span class="text-gray-400 text-xs">${row.timeAlive}s</span>
+                            </div>
+                        `;
+                        miniList.appendChild(div);
+                    });
+                }
+            }
+
+            // Update Full Global Leaderboard Table
+            const listEl = document.getElementById('leaderboard-list');
+            if (listEl) {
+                const top10 = leaderboardData.slice(0, 10);
+                listEl.innerHTML = '';
+                if (top10.length === 0) {
+                    listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No records yet!</td></tr>';
+                } else {
+                    top10.forEach((row, index) => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
+                        const isTop1 = index === 0 ? 'text-yellow-400 font-black text-2xl drop-shadow-md' : '';
+                        const isTop2 = index === 1 ? 'text-gray-300 font-bold text-xl' : '';
+                        const isTop3 = index === 2 ? 'text-amber-600 font-bold text-xl' : '';
+
+                        tr.innerHTML = `
+                            <td class="p-4 ${isTop1 || isTop2 || isTop3}">#${index + 1}</td>
+                            <td class="p-4 font-bold truncate max-w-[120px] md:max-w-[200px]">${row.name}</td>
+                            <td class="p-4 text-center font-black text-indigo-300">${row.score}</td>
+                            <td class="p-4 text-right text-gray-400">${row.timeAlive}s</td>
+                        `;
+                        listEl.appendChild(tr);
+                    });
+                }
+            }
+        }
+
+        window.showLeaderboard = function(returnScreen = 'welcome-screen') {
             document.getElementById('lb-back-btn').onclick = () => window.switchScreen(returnScreen);
             window.switchScreen('leaderboard-screen');
-            const listEl = document.getElementById('leaderboard-list');
-            listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">Loading...</td></tr>';
-            
-            let data = [];
-            if (currentUser && db) {
-                try {
-                    const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-                    const snapshot = await getDocs(lbRef);
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
-                } catch (e) {
-                    console.error("Failed to fetch leaderboard", e);
-                    data = [...leaderboardData];
-                }
-            } else {
-                data = [...leaderboardData];
-            }
+        }
 
-            // Sort: highest score, then highest time alive
-            data.sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return b.timeAlive - a.timeAlive;
-            });
-            
-            leaderboardData = data;
-            
-            const top10 = data.slice(0, 10);
-            listEl.innerHTML = '';
-            
-            if (top10.length === 0) {
-                listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No records yet!</td></tr>';
-                return;
-            }
-
-            top10.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
+        // --- INITIALIZE REAL-TIME CLOUD FIREBASE ---
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
                 
-                const isTop1 = index === 0 ? 'text-yellow-400 font-black text-2xl drop-shadow-md' : '';
-                const isTop2 = index === 1 ? 'text-gray-300 font-bold text-xl' : '';
-                const isTop3 = index === 2 ? 'text-amber-600 font-bold text-xl' : '';
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch(e) {
+                        console.error("Auth failed:", e);
+                    }
+                };
+                initAuth();
 
-                tr.innerHTML = `
-                    <td class="p-4 ${isTop1 || isTop2 || isTop3}">#${index + 1}</td>
-                    <td class="p-4 font-bold truncate max-w-[120px] md:max-w-[200px]">${row.name}</td>
-                    <td class="p-4 text-center font-black text-indigo-300">${row.score}</td>
-                    <td class="p-4 text-right text-gray-400">${row.timeAlive}s</td>
-                `;
-                listEl.appendChild(tr);
-            });
+                // Listen for secure connection, then subscribe to live records!
+                onAuthStateChanged(auth, user => {
+                    currentUser = user;
+                    if (user) {
+                        subscribeToLeaderboard();
+                    }
+                });
+            } else {
+                console.warn("Real-time DB missing, falling back to local session.");
+                updateLeaderboardUI();
+            }
+        } catch (e) {
+            console.warn("Real-time Firebase initialization error:", e);
+            updateLeaderboardUI();
         }
 
         // Initialize display
