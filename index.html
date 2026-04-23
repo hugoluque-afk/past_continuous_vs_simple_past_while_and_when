@@ -13,7 +13,7 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             overflow: hidden;
-            background-color: #0f172a; /* Fallback */
+            background-color: #0f172a;
         }
 
         @keyframes fadeInUp {
@@ -50,7 +50,6 @@
             fill: none;
         }
 
-        /* Prevent text selection to feel more like an app */
         .no-select {
             -webkit-user-select: none;
             -ms-user-select: none;
@@ -59,6 +58,12 @@
     </style>
 </head>
 <body class="no-select text-slate-800">
+
+    <!-- OFFLINE BADGE INDICATOR -->
+    <div id="offline-badge" class="hidden absolute top-4 left-4 z-50 bg-red-600/90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg backdrop-blur-sm border border-red-400 flex items-center space-x-2 animate-pulse">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+        <span id="offline-text">Offline Mode (Local Only)</span>
+    </div>
 
     <!-- DECORATIVE BACKGROUNDS -->
     <div id="bg-decorations" class="hidden">
@@ -69,7 +74,7 @@
     <!-- WELCOME SCREEN -->
     <div id="welcome-screen" class="min-h-screen w-full bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 flex flex-col items-center justify-center p-6 text-white absolute inset-0 z-10 transition-opacity duration-300 overflow-y-auto">
         
-        <div class="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-8 w-full max-w-6xl z-10 my-auto">
+        <div class="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-8 w-full max-w-6xl z-10 my-auto mt-12 md:mt-auto">
             
             <!-- LEFT PANEL: Main Game Start -->
             <div class="max-w-2xl w-full text-center space-y-8 p-8 md:p-10 bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 animate-fade-in-up flex flex-col justify-center">
@@ -113,7 +118,7 @@
                 </h3>
                 
                 <div id="mini-leaderboard-list" class="space-y-3 text-sm flex-1 relative z-10">
-                    <p class="text-gray-400 text-center mt-8">Loading live records...</p>
+                    <p class="text-gray-400 text-center mt-8">Connecting to Sheets...</p>
                 </div>
                 
                 <button onclick="showLeaderboard('welcome-screen')" class="mt-6 w-full py-4 bg-indigo-600/30 hover:bg-indigo-600/50 rounded-2xl text-indigo-200 hover:text-white text-sm md:text-base font-bold transition-all border border-indigo-400/30 relative z-10 shadow-lg">
@@ -264,14 +269,11 @@
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // 🚀 IMPORTANTE: PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+        const GOOGLE_SHEETS_URL = ""; 
 
         // --- GLOBAL VARIABLES ---
-        let app, auth, db, currentUser;
-        let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         let playerName = "";
         let score = 0;
         let lives = 5;
@@ -285,8 +287,14 @@
         let totalTimeAlive = 0;
         let questionStartTime = 0;
 
-        let leaderboardData = []; // Main Cache
-        let unsubscribeLeaderboard = null;
+        let leaderboardData = []; 
+        let leaderboardPollingInterval = null;
+
+        // Check Setup
+        if (GOOGLE_SHEETS_URL.trim() === "") {
+            document.getElementById('offline-badge').classList.remove('hidden');
+            document.getElementById('offline-text').innerText = "URL de Google Sheets no configurada. Récords locales.";
+        }
 
         // Load voices early
         if ('speechSynthesis' in window) {
@@ -371,8 +379,10 @@
 
             if(screenId === 'playing-screen'){
                 document.getElementById('bg-decorations').classList.remove('hidden');
-            } else {
+                stopLeaderboardPolling();
+            } else if (screenId === 'welcome-screen' || screenId === 'leaderboard-screen') {
                 document.getElementById('bg-decorations').classList.add('hidden');
+                startLeaderboardPolling();
             }
         }
 
@@ -494,7 +504,7 @@
 
         function startTimer() {
             clearInterval(timerInterval);
-            questionTimeLimit = Math.max(5, 15 - (level - 1) * 1.5); // Gets faster each level
+            questionTimeLimit = Math.max(5, 15 - (level - 1) * 1.5); 
             currentTimer = questionTimeLimit;
             questionStartTime = Date.now();
             
@@ -606,7 +616,7 @@
                 }, 2000);
 
             } else {
-                const msg = feedbackFail[Math.floor(Math.random() * (feedbackFail.length - 1))]; // Exclude "Time's up!"
+                const msg = feedbackFail[Math.floor(Math.random() * (feedbackFail.length - 1))]; 
                 feedbackText.innerText = msg;
                 feedbackText.className = "text-6xl md:text-8xl font-black drop-shadow-xl animate-bounce-custom text-center text-red-500";
                 overlay.classList.remove('hidden');
@@ -668,20 +678,25 @@
             speak("Game Over. You did your best!");
 
             const newRecord = {
-                name: playerName,
-                score: score,
-                timeAlive: parseFloat(totalTimeAlive.toFixed(1)),
-                timestamp: Date.now()
+                name: playerName || "Unknown",
+                score: Number(score),
+                timeAlive: Number(parseFloat(totalTimeAlive).toFixed(1))
             };
 
-            // Real-Time Firebase Save
-            if (currentUser && db) {
+            // GRABADO A GOOGLE SHEETS
+            if (GOOGLE_SHEETS_URL.trim() !== "") {
                 try {
-                    const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-                    await addDoc(lbRef, newRecord);
-                    // It will be updated automatically via the Real-Time Listener (onSnapshot)
+                    await fetch(GOOGLE_SHEETS_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8', 
+                        },
+                        body: JSON.stringify(newRecord)
+                    });
+                    console.log("Guardado en Google Sheets correctamente.");
+                    fetchLeaderboardData(); // Refrescar base de datos visual
                 } catch (e) {
-                    console.error("Failed to save score online", e);
+                    console.error("No se pudo guardar en Google Sheets.", e);
                     fallbackLocalSave(newRecord);
                 }
             } else {
@@ -693,38 +708,44 @@
             leaderboardData.push(newRecord);
             leaderboardData.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
-                return a.timeAlive - b.timeAlive; // Lower time is better on ties
+                return a.timeAlive - b.timeAlive; 
             });
             updateLeaderboardUI();
         }
 
-        // --- REAL-TIME LEADERBOARD LOGIC ---
-        function subscribeToLeaderboard() {
-            if (!currentUser || !db) return;
-            const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-            
-            if (unsubscribeLeaderboard) unsubscribeLeaderboard();
-            
-            // Listen to live database changes!
-            unsubscribeLeaderboard = onSnapshot(lbRef, (snapshot) => {
-                let data = [];
-                snapshot.forEach(doc => data.push(doc.data()));
-                
-                // Sort Rule: 1) Highest Score 2) Lowest Time
-                data.sort((a, b) => {
-                    if (b.score !== a.score) return b.score - a.score;
-                    return a.timeAlive - b.timeAlive;
-                });
-                
-                leaderboardData = data;
+        // --- GOOGLE SHEETS FETCHING LOGIC ---
+        async function fetchLeaderboardData() {
+            if (GOOGLE_SHEETS_URL.trim() === "") {
                 updateLeaderboardUI();
-            }, (error) => {
-                console.error("Realtime leaderboard sync failed:", error);
-            });
+                return;
+            }
+
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL);
+                const data = await response.json();
+                leaderboardData = data;
+                document.getElementById('offline-badge').classList.add('hidden');
+                updateLeaderboardUI();
+            } catch (e) {
+                console.error("Error obteniendo datos de Google Sheets:", e);
+                document.getElementById('offline-badge').classList.remove('hidden');
+                document.getElementById('offline-text').innerText = "Sin conexión a Google Sheets.";
+                updateLeaderboardUI(); // Muestra caché local si falla
+            }
+        }
+
+        function startLeaderboardPolling() {
+            if(leaderboardPollingInterval) clearInterval(leaderboardPollingInterval);
+            fetchLeaderboardData(); // Fetch de inicio
+            leaderboardPollingInterval = setInterval(fetchLeaderboardData, 10000); // Refresca cada 10 segundos
+        }
+
+        function stopLeaderboardPolling() {
+            if(leaderboardPollingInterval) clearInterval(leaderboardPollingInterval);
         }
 
         function updateLeaderboardUI() {
-            // Update Mini Leaderboard on Welcome Screen
+            // Update Mini Leaderboard
             const miniList = document.getElementById('mini-leaderboard-list');
             if (miniList) {
                 const top3 = leaderboardData.slice(0, 3);
@@ -752,15 +773,15 @@
                 }
             }
 
-            // Update Full Global Leaderboard Table
+            // Update Full Leaderboard Table
             const listEl = document.getElementById('leaderboard-list');
             if (listEl) {
-                const top10 = leaderboardData.slice(0, 10);
+                const top50 = leaderboardData.slice(0, 50); // Mostrar solo el Top 50
                 listEl.innerHTML = '';
-                if (top10.length === 0) {
+                if (top50.length === 0) {
                     listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No records yet!</td></tr>';
                 } else {
-                    top10.forEach((row, index) => {
+                    top50.forEach((row, index) => {
                         const tr = document.createElement('tr');
                         tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
                         const isTop1 = index === 0 ? 'text-yellow-400 font-black text-2xl drop-shadow-md' : '';
@@ -784,45 +805,9 @@
             window.switchScreen('leaderboard-screen');
         }
 
-        // --- INITIALIZE REAL-TIME CLOUD FIREBASE ---
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                
-                const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch(e) {
-                        console.error("Auth failed:", e);
-                    }
-                };
-                initAuth();
-
-                // Listen for secure connection, then subscribe to live records!
-                onAuthStateChanged(auth, user => {
-                    currentUser = user;
-                    if (user) {
-                        subscribeToLeaderboard();
-                    }
-                });
-            } else {
-                console.warn("Real-time DB missing, falling back to local session.");
-                updateLeaderboardUI();
-            }
-        } catch (e) {
-            console.warn("Real-time Firebase initialization error:", e);
-            updateLeaderboardUI();
-        }
-
-        // Initialize display
+        // Initialize display and start polling sheets data
         renderHearts();
+        startLeaderboardPolling();
     </script>
 </body>
 </html>
