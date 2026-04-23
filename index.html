@@ -114,7 +114,7 @@
                 
                 <h3 class="text-amber-400 font-black text-2xl mb-6 flex items-center justify-center space-x-2 border-b border-white/10 pb-4 relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
-                    <span>Top 3 Masters</span>
+                    <span>Top 5 Masters</span>
                 </h3>
                 
                 <div id="mini-leaderboard-list" class="space-y-3 text-sm flex-1 relative z-10">
@@ -748,12 +748,12 @@
             // Update Mini Leaderboard
             const miniList = document.getElementById('mini-leaderboard-list');
             if (miniList) {
-                const top3 = leaderboardData.slice(0, 3);
+                const top5 = leaderboardData.slice(0, 5);
                 miniList.innerHTML = '';
-                if (top3.length === 0) {
+                if (top5.length === 0) {
                     miniList.innerHTML = '<p class="text-gray-400 text-center mt-4">No records yet! Be the first!</p>';
                 } else {
-                    top3.forEach((row, index) => {
+                    top5.forEach((row, index) => {
                         const div = document.createElement('div');
                         div.className = 'flex justify-between items-center bg-white/5 px-4 py-3 rounded-xl border border-white/5';
                         const isTop1 = index === 0 ? 'text-yellow-400 font-bold' : 'text-gray-200';
