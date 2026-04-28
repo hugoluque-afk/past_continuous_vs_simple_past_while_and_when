@@ -57,7 +57,8 @@
         }
     </style>
 </head>
-<body class="no-select text-slate-800">
+<!-- Se agregó oncontextmenu="return false;" para deshabilitar el clic derecho -->
+<body class="no-select text-slate-800" oncontextmenu="return false;">
 
     <!-- OFFLINE BADGE INDICATOR -->
     <div id="offline-badge" class="hidden absolute top-4 left-4 z-50 bg-red-600/90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg backdrop-blur-sm border border-red-400 flex items-center space-x-2 animate-pulse">
@@ -92,8 +93,13 @@
                 </p>
 
                 <div class="max-w-sm mx-auto w-full mt-4 mb-4 relative">
-                    <input type="text" id="player-name" placeholder="Enter your name to start..." class="w-full px-6 py-4 rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-inner" maxlength="20">
-                    <p id="name-error" class="hidden text-red-300 font-semibold mt-2 drop-shadow-md">Please enter your name!</p>
+                    <!-- Se agregó list="student-names" y autocomplete="off" -->
+                    <input type="text" id="player-name" list="student-names" placeholder="Enter your name to start..." autocomplete="off" class="w-full px-6 py-4 rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-inner" maxlength="50">
+                    <!-- Datalist para el menú desplegable -->
+                    <datalist id="student-names">
+                        <!-- Llenado vía JS desde Google Sheets -->
+                    </datalist>
+                    <p id="name-error" class="hidden text-red-300 font-semibold mt-2 drop-shadow-md text-sm md:text-base">Please enter your name!</p>
                 </div>
 
                 <div class="flex flex-col items-center space-y-4">
@@ -270,8 +276,8 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // 🚀 IMPORTANTE: PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxvj8HEsfGJjYWHSJrcTVPuI5onZZ6d8-J3RBQhHDNiuTz2CXp97GR-nmc1DW9nYkoMig/exec"; 
+        // 🚀 IMPORTANTE: URL de tu aplicación Google Apps Script
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyypy5Xr0xZizaJxci6vQjQL4bOlYM3lNZn7icO-VNG8hbqWqsiQTs3Rvf-X6y_V2bgXw/exec"; 
 
         // --- GLOBAL VARIABLES ---
         let playerName = "";
@@ -289,9 +295,11 @@
 
         let leaderboardData = []; 
         let leaderboardPollingInterval = null;
-        let userIP = "unknown"; // Nueva variable para guardar la IP
+        let userIP = "unknown"; 
+        
+        let allowedNames = []; // Lista de alumnos autorizados
 
-        // Obtener IP del usuario al cargar la página
+        // Obtener IP del usuario
         async function fetchUserIP() {
             try {
                 const res = await fetch("https://api.ipify.org?format=json");
@@ -302,6 +310,31 @@
             }
         }
         fetchUserIP();
+
+        // Obtener la lista de nombres autorizados (Columna A de la hoja "List")
+        async function fetchStudentNames() {
+            if (GOOGLE_SHEETS_URL.trim() === "") return;
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL + "?action=getNames");
+                const names = await response.json();
+                if (Array.isArray(names)) {
+                    // Guardamos los nombres en minúscula para validación fácil
+                    allowedNames = names.map(n => n.toLowerCase().trim());
+                    
+                    // Llenamos el Datalist del HTML
+                    const datalist = document.getElementById('student-names');
+                    datalist.innerHTML = '';
+                    names.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        datalist.appendChild(option);
+                    });
+                }
+            } catch (e) {
+                console.warn("Error al cargar la lista de estudiantes", e);
+            }
+        }
+        fetchStudentNames();
 
         // Check Setup
         if (GOOGLE_SHEETS_URL.trim() === "") {
@@ -435,12 +468,24 @@
         }
 
         window.startGame = function() {
-            playerName = document.getElementById('player-name').value.trim();
+            const rawInput = document.getElementById('player-name').value;
+            playerName = rawInput.trim();
+            const errorEl = document.getElementById('name-error');
+
             if (!playerName) {
-                document.getElementById('name-error').classList.remove('hidden');
+                errorEl.innerText = "Please enter your name!";
+                errorEl.classList.remove('hidden');
                 return;
             }
-            document.getElementById('name-error').classList.add('hidden');
+
+            // Validar que el nombre esté dentro de la hoja de Google Sheets (Listado)
+            if (allowedNames.length > 0 && !allowedNames.includes(playerName.toLowerCase())) {
+                errorEl.innerText = "Please select a valid name from the list!";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            errorEl.classList.add('hidden');
 
             if ('speechSynthesis' in window) {
                 const silent = new SpeechSynthesisUtterance('');
@@ -737,7 +782,22 @@
             try {
                 const response = await fetch(GOOGLE_SHEETS_URL);
                 const data = await response.json();
-                leaderboardData = data;
+                
+                // Mantenemos el filtro de IPs a nivel cliente como respaldo
+                let uniqueIPs = {};
+                let topRecords = [];
+                data.forEach(rec => {
+                    if (rec.ip && rec.ip.toString().trim() !== "" && rec.ip !== "unknown") {
+                        if (!uniqueIPs[rec.ip]) {
+                            uniqueIPs[rec.ip] = true;
+                            topRecords.push(rec);
+                        }
+                    } else {
+                        topRecords.push(rec); // permitimos los antiguos
+                    }
+                });
+
+                leaderboardData = topRecords;
                 document.getElementById('offline-badge').classList.add('hidden');
                 updateLeaderboardUI();
             } catch (e) {
