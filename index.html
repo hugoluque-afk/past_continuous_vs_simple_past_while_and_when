@@ -70,6 +70,11 @@
         #custom-suggestions::-webkit-scrollbar-thumb:hover {
             background: #94a3b8; 
         }
+        
+        /* Borde rosado forzado al buscar */
+        .input-searching {
+            border-color: #ec4899 !important; /* text-pink-500 */
+        }
     </style>
 </head>
 <body class="no-select text-slate-800" oncontextmenu="return false;">
@@ -339,14 +344,17 @@
                 if (Array.isArray(names)) {
                     originalAllowedNames = names.map(n => n.trim());
                     allowedNames = names.map(n => n.toLowerCase().trim());
-                    // Una vez que carga con éxito, cambia el texto
+                    
+                    // Una vez que carga con éxito, cambia el texto para avisarle al usuario
                     inputEl.placeholder = "Enter your name to start...";
                     inputEl.disabled = false;
+                } else {
+                    throw new Error("Invalid format from server");
                 }
             } catch (e) {
                 console.warn("Error al cargar la lista de estudiantes", e);
-                inputEl.placeholder = "Failed to load names";
-                inputEl.disabled = false;
+                inputEl.placeholder = "Failed to load names. Try reloading.";
+                inputEl.disabled = true;
             }
         }
         fetchStudentNames();
@@ -356,16 +364,21 @@
         const suggestionsEl = document.getElementById('custom-suggestions');
         const autocompleteContainer = document.getElementById('autocomplete-container');
 
-        // Muestra sugerencias al escribir
+        // Muestra sugerencias al escribir inmediatamente
         inputEl.addEventListener('input', function() {
             const val = this.value.toLowerCase();
             suggestionsEl.innerHTML = ''; 
             
             if (!val.trim()) {
                 suggestionsEl.classList.add('hidden');
+                inputEl.classList.remove('input-searching'); // Quitar borde rosado
                 return;
             }
 
+            // Poner el borde rosado idéntico a la imagen al escribir
+            inputEl.classList.add('input-searching'); 
+
+            // Filtrar y buscar coincidencias en cualquier parte del nombre
             const matches = originalAllowedNames.filter(name => name.toLowerCase().includes(val.trim()));
             
             if (matches.length === 0) {
@@ -375,10 +388,10 @@
 
             suggestionsEl.classList.remove('hidden');
 
-            // Función para escapar caracteres en regex
+            // Función para escapar caracteres y no romper el regex
             const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-            // Crear los elementos de la lista
+            // Crear los elementos de la lista resaltando el texto
             matches.forEach(name => {
                 const li = document.createElement('li');
                 li.className = 'px-8 py-4 cursor-pointer hover:bg-pink-50 border-b border-slate-100 last:border-b-0 text-slate-800 font-semibold text-lg text-left transition-colors';
@@ -389,21 +402,23 @@
                 
                 li.innerHTML = highlightedName;
                 
-                // Al hacer clic, rellenar el input y ocultar la lista
+                // Al hacer clic, rellenar el input, quitar el borde y ocultar la lista
                 li.onmousedown = function(e) { 
                     e.preventDefault();
                     inputEl.value = name;
                     suggestionsEl.classList.add('hidden');
+                    inputEl.classList.remove('input-searching');
                     document.getElementById('name-error').classList.add('hidden'); 
                 };
                 suggestionsEl.appendChild(li);
             });
         });
 
-        // Ocultar sugerencias si hace clic fuera del contenedor
+        // Ocultar sugerencias y quitar borde al hacer clic fuera del input
         document.addEventListener('click', function(e) {
             if (!autocompleteContainer.contains(e.target)) {
                 suggestionsEl.classList.add('hidden');
+                inputEl.classList.remove('input-searching');
             }
         });
 
@@ -550,14 +565,21 @@
             playerName = rawInput.trim();
             const errorEl = document.getElementById('name-error');
 
+            // BLOQUEO ABSOLUTO: Si la lista de la base de datos está vacía, no deja jugar.
+            if (allowedNames.length === 0) {
+                errorEl.innerText = "Please wait, names are still loading from database...";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
             if (!playerName) {
                 errorEl.innerText = "Please enter your name!";
                 errorEl.classList.remove('hidden');
                 return;
             }
 
-            // Validar de manera estricta que el nombre esté dentro de la hoja de Google Sheets (Listado)
-            if (allowedNames.length > 0 && !allowedNames.includes(playerName.toLowerCase())) {
+            // Validar estrictamente que el nombre ingresado EXISTA en la base de datos (Google Sheets)
+            if (!allowedNames.includes(playerName.toLowerCase())) {
                 errorEl.innerText = "Please select a valid name from the list!";
                 errorEl.classList.remove('hidden');
                 return;
