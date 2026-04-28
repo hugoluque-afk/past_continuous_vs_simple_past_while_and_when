@@ -55,6 +55,22 @@
             -ms-user-select: none;
             user-select: none;
         }
+
+        /* Estilo sutil para el scroll del autocomplete */
+        #custom-suggestions::-webkit-scrollbar {
+            width: 8px;
+        }
+        #custom-suggestions::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 10px;
+        }
+        #custom-suggestions::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        #custom-suggestions::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
     </style>
 </head>
 <!-- Se agregó oncontextmenu="return false;" para deshabilitar el clic derecho -->
@@ -92,13 +108,15 @@
                     Master the Simple Past and Past Continuous. Over 100+ unique exercises!
                 </p>
 
-                <div class="max-w-sm mx-auto w-full mt-4 mb-4 relative">
-                    <!-- Se agregó list="student-names" y autocomplete="off" -->
-                    <input type="text" id="player-name" list="student-names" placeholder="Enter your name to start..." autocomplete="off" class="w-full px-6 py-4 rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-inner" maxlength="50">
-                    <!-- Datalist para el menú desplegable -->
-                    <datalist id="student-names">
-                        <!-- Llenado vía JS desde Google Sheets -->
-                    </datalist>
+                <!-- CONTENEDOR AUTOCOMPLETE PERSONALIZADO -->
+                <div class="max-w-sm mx-auto w-full mt-4 mb-4 relative" id="autocomplete-container">
+                    <input type="text" id="player-name" placeholder="Enter your name to start..." autocomplete="off" class="w-full px-6 py-4 rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-inner" maxlength="50">
+                    
+                    <!-- Lista desplegable personalizada que reemplaza al datalist -->
+                    <ul id="custom-suggestions" class="absolute w-full mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden hidden z-50 text-left max-h-60 overflow-y-auto border border-slate-200">
+                        <!-- Las opciones se insertan aquí vía JS -->
+                    </ul>
+                    
                     <p id="name-error" class="hidden text-red-300 font-semibold mt-2 drop-shadow-md text-sm md:text-base">Please enter your name!</p>
                 </div>
 
@@ -277,7 +295,7 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         // 🚀 IMPORTANTE: URL de tu aplicación Google Apps Script
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyypy5Xr0xZizaJxci6vQjQL4bOlYM3lNZn7icO-VNG8hbqWqsiQTs3Rvf-X6y_V2bgXw/exec"; 
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxvj8HEsfGJjYWHSJrcTVPuI5onZZ6d8-J3RBQhHDNiuTz2CXp97GR-nmc1DW9nYkoMig/exec"; 
 
         // --- GLOBAL VARIABLES ---
         let playerName = "";
@@ -297,7 +315,8 @@
         let leaderboardPollingInterval = null;
         let userIP = "unknown"; 
         
-        let allowedNames = []; // Lista de alumnos autorizados
+        let allowedNames = []; // Lista de alumnos autorizados en minúsculas para validación
+        let originalAllowedNames = []; // Lista original con mayúsculas para mostrar en el dropdown
 
         // Obtener IP del usuario
         async function fetchUserIP() {
@@ -318,23 +337,75 @@
                 const response = await fetch(GOOGLE_SHEETS_URL + "?action=getNames");
                 const names = await response.json();
                 if (Array.isArray(names)) {
-                    // Guardamos los nombres en minúscula para validación fácil
+                    // Guardamos la lista original y la lista en minúsculas
+                    originalAllowedNames = names.map(n => n.trim());
                     allowedNames = names.map(n => n.toLowerCase().trim());
-                    
-                    // Llenamos el Datalist del HTML
-                    const datalist = document.getElementById('student-names');
-                    datalist.innerHTML = '';
-                    names.forEach(name => {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        datalist.appendChild(option);
-                    });
                 }
             } catch (e) {
                 console.warn("Error al cargar la lista de estudiantes", e);
             }
         }
         fetchStudentNames();
+
+        // LÓGICA DEL AUTOCOMPLETE PERSONALIZADO
+        const inputEl = document.getElementById('player-name');
+        const suggestionsEl = document.getElementById('custom-suggestions');
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+
+        // Muestra sugerencias al escribir
+        inputEl.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            suggestionsEl.innerHTML = ''; // Limpiar lista
+            
+            if (!val) {
+                suggestionsEl.classList.add('hidden');
+                return;
+            }
+
+            // Filtrar los nombres que contienen el texto escrito
+            const matches = originalAllowedNames.filter(name => name.toLowerCase().includes(val));
+            
+            if (matches.length === 0) {
+                suggestionsEl.classList.add('hidden');
+                return;
+            }
+
+            suggestionsEl.classList.remove('hidden');
+
+            // Crear los elementos de la lista resaltando el texto
+            matches.forEach(name => {
+                const li = document.createElement('li');
+                li.className = 'px-6 py-3 cursor-pointer hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-slate-700 font-semibold text-lg transition-colors';
+                
+                // Resaltar en rosado brillante la parte que coincide
+                const regex = new RegExp(`(${val})`, "gi");
+                const highlightedName = name.replace(regex, "<span class='text-pink-500 font-bold'>$1</span>");
+                
+                li.innerHTML = highlightedName;
+                
+                // Al hacer clic, rellenar el input y ocultar la lista
+                li.onmousedown = function(e) { // Usamos onmousedown para evitar que el blur del input lo oculte antes
+                    e.preventDefault();
+                    inputEl.value = name;
+                    suggestionsEl.classList.add('hidden');
+                };
+                suggestionsEl.appendChild(li);
+            });
+        });
+
+        // Ocultar sugerencias si hace clic fuera del contenedor
+        document.addEventListener('click', function(e) {
+            if (!autocompleteContainer.contains(e.target)) {
+                suggestionsEl.classList.add('hidden');
+            }
+        });
+
+        // Mostrar sugerencias si vuelve a hacer foco y hay texto
+        inputEl.addEventListener('focus', function() {
+            if (this.value.trim() !== '') {
+                 this.dispatchEvent(new Event('input'));
+            }
+        });
 
         // Check Setup
         if (GOOGLE_SHEETS_URL.trim() === "") {
