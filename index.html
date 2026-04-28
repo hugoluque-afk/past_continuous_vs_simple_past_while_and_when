@@ -58,11 +58,10 @@
 
         /* Estilo sutil para el scroll del autocomplete */
         #custom-suggestions::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         #custom-suggestions::-webkit-scrollbar-track {
-            background: #f1f5f9; 
-            border-radius: 10px;
+            background: transparent; 
         }
         #custom-suggestions::-webkit-scrollbar-thumb {
             background: #cbd5e1; 
@@ -73,7 +72,6 @@
         }
     </style>
 </head>
-<!-- Se agregó oncontextmenu="return false;" para deshabilitar el clic derecho -->
 <body class="no-select text-slate-800" oncontextmenu="return false;">
 
     <!-- OFFLINE BADGE INDICATOR -->
@@ -108,25 +106,25 @@
                     Master the Simple Past and Past Continuous. Over 100+ unique exercises!
                 </p>
 
-                <!-- CONTENEDOR AUTOCOMPLETE PERSONALIZADO -->
+                <!-- CONTENEDOR AUTOCOMPLETE PERSONALIZADO (Ajustado al diseño visual) -->
                 <div class="max-w-sm mx-auto w-full mt-4 mb-4 relative" id="autocomplete-container">
-                    <input type="text" id="player-name" placeholder="Enter your name to start..." autocomplete="off" class="w-full px-6 py-4 rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-inner" maxlength="50">
+                    <input type="text" id="player-name" placeholder="Enter your name to start..." autocomplete="off" class="w-full px-6 py-4 bg-white rounded-full text-slate-800 font-bold text-xl text-center focus:outline-none border-4 border-transparent focus:border-pink-500 shadow-inner transition-colors duration-200" maxlength="50">
                     
-                    <!-- Lista desplegable personalizada que reemplaza al datalist -->
-                    <ul id="custom-suggestions" class="absolute w-full mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden hidden z-50 text-left max-h-60 overflow-y-auto border border-slate-200">
+                    <!-- Lista desplegable estilo diseño de imagen -->
+                    <ul id="custom-suggestions" class="absolute w-full mt-3 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] overflow-hidden hidden z-50 text-left max-h-[220px] overflow-y-auto">
                         <!-- Las opciones se insertan aquí vía JS -->
                     </ul>
                     
-                    <p id="name-error" class="hidden text-red-300 font-semibold mt-2 drop-shadow-md text-sm md:text-base">Please enter your name!</p>
+                    <p id="name-error" class="hidden text-pink-400 font-bold mt-3 drop-shadow-md text-sm md:text-base">Please enter your name!</p>
                 </div>
 
                 <div class="flex flex-col items-center space-y-4">
-                    <button onclick="startGame()" class="group relative px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
+                    <button onclick="startGame()" class="group relative px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
                         <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:animate-pulse"></span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         <span>Start Learning</span>
                     </button>
-                    <p class="text-white/50 text-sm font-medium tracking-wide">
+                    <p class="text-white/50 text-sm font-medium tracking-wide pt-2">
                         Developed by: Hugo Luque
                     </p>
                 </div>
@@ -347,7 +345,7 @@
         }
         fetchStudentNames();
 
-        // LÓGICA DEL AUTOCOMPLETE PERSONALIZADO
+        // LÓGICA DEL AUTOCOMPLETE PERSONALIZADO VISUAL
         const inputEl = document.getElementById('player-name');
         const suggestionsEl = document.getElementById('custom-suggestions');
         const autocompleteContainer = document.getElementById('autocomplete-container');
@@ -372,22 +370,23 @@
 
             suggestionsEl.classList.remove('hidden');
 
-            // Crear los elementos de la lista resaltando el texto
+            // Crear los elementos de la lista resaltando el texto exactamente como la imagen
             matches.forEach(name => {
                 const li = document.createElement('li');
-                li.className = 'px-6 py-3 cursor-pointer hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-slate-700 font-semibold text-lg transition-colors';
+                li.className = 'px-6 py-4 cursor-pointer hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-slate-700 font-semibold text-lg transition-colors';
                 
-                // Resaltar en rosado brillante la parte que coincide
+                // Resaltar en rosado intenso la parte que coincide
                 const regex = new RegExp(`(${val})`, "gi");
                 const highlightedName = name.replace(regex, "<span class='text-pink-500 font-bold'>$1</span>");
                 
                 li.innerHTML = highlightedName;
                 
                 // Al hacer clic, rellenar el input y ocultar la lista
-                li.onmousedown = function(e) { // Usamos onmousedown para evitar que el blur del input lo oculte antes
+                li.onmousedown = function(e) { 
                     e.preventDefault();
                     inputEl.value = name;
                     suggestionsEl.classList.add('hidden');
+                    document.getElementById('name-error').classList.add('hidden'); // Limpiar error si había
                 };
                 suggestionsEl.appendChild(li);
             });
@@ -549,7 +548,7 @@
                 return;
             }
 
-            // Validar que el nombre esté dentro de la hoja de Google Sheets (Listado)
+            // Validar de manera estricta que el nombre esté dentro de la hoja de Google Sheets (Listado)
             if (allowedNames.length > 0 && !allowedNames.includes(playerName.toLowerCase())) {
                 errorEl.innerText = "Please select a valid name from the list!";
                 errorEl.classList.remove('hidden');
@@ -557,6 +556,7 @@
             }
 
             errorEl.classList.add('hidden');
+            suggestionsEl.classList.add('hidden');
 
             if ('speechSynthesis' in window) {
                 const silent = new SpeechSynthesisUtterance('');
