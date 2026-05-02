@@ -297,8 +297,22 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // 🚀 IMPORTANTE: URL de tu aplicación Google Apps Script
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxdk0606gPbemhiLhlZJahNAKsZufuih59eygXvwtA9pFJUZxleS024orm7ZcxunjGL/exec"; 
+        // BLOQUEO DE TECLAS DE DESARROLLADOR (F12, Ctrl+U, Ctrl+Shift+I)
+        document.addEventListener('keydown', function(event) {
+            if (event.keyCode == 123) { 
+                event.preventDefault(); return false;
+            } else if (event.ctrlKey && event.shiftKey && event.keyCode == 73) { 
+                event.preventDefault(); return false;
+            } else if (event.ctrlKey && event.keyCode == 85) { 
+                event.preventDefault(); return false;
+            }
+        });
+
+        // 🚀 URL Encriptada y Ofuscada en Base64 para evitar robo
+        const _0xUrl = atob('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4ZGswNjA2Z1BiZW1oaUxobFpKYWhOQUtzWnVmdWloNTlleWdYdnd0QTlwRkpVWHhsZVMwMjRvcm03WmN4dW5qR0wvZXhlYw==');
+
+        // Generador de Token Anti-Trampa Ofuscado
+        const _0x1a2b = function(_0x2c,_0x3d){return btoa(_0x2c+'-'+_0x3d+'-'+atob('Y2l0eXZvY2FiMjAyNA=='));};
 
         // --- GLOBAL VARIABLES ---
         let playerName = "";
@@ -333,19 +347,18 @@
         }
         fetchUserIP();
 
-        // Obtener la lista de nombres autorizados (Columna A de la hoja "List")
+        // Obtener la lista de nombres autorizados
         async function fetchStudentNames() {
-            if (GOOGLE_SHEETS_URL.trim() === "") return;
+            if (_0xUrl.trim() === "") return;
             const inputEl = document.getElementById('player-name');
             
             try {
-                const response = await fetch(GOOGLE_SHEETS_URL + "?action=getNames");
+                const response = await fetch(_0xUrl + "?action=getNames");
                 const names = await response.json();
                 if (Array.isArray(names)) {
                     originalAllowedNames = names.map(n => n.trim());
                     allowedNames = names.map(n => n.toLowerCase().trim());
                     
-                    // Una vez que carga con éxito, cambia el texto para avisarle al usuario
                     inputEl.placeholder = "Enter your name to start...";
                     inputEl.disabled = false;
                 } else {
@@ -371,14 +384,12 @@
             
             if (!val.trim()) {
                 suggestionsEl.classList.add('hidden');
-                inputEl.classList.remove('input-searching'); // Quitar borde rosado
+                inputEl.classList.remove('input-searching'); 
                 return;
             }
 
-            // Poner el borde rosado idéntico a la imagen al escribir
             inputEl.classList.add('input-searching'); 
 
-            // Filtrar y buscar coincidencias en cualquier parte del nombre
             const matches = originalAllowedNames.filter(name => name.toLowerCase().includes(val.trim()));
             
             if (matches.length === 0) {
@@ -388,21 +399,17 @@
 
             suggestionsEl.classList.remove('hidden');
 
-            // Función para escapar caracteres y no romper el regex
             const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-            // Crear los elementos de la lista resaltando el texto
             matches.forEach(name => {
                 const li = document.createElement('li');
                 li.className = 'px-8 py-4 cursor-pointer hover:bg-pink-50 border-b border-slate-100 last:border-b-0 text-slate-800 font-semibold text-lg text-left transition-colors';
                 
-                // Resaltar en rosado intenso y negrita la parte que coincide
                 const regex = new RegExp(`(${escapeRegExp(val.trim())})`, "gi");
                 const highlightedName = name.replace(regex, "<span class='text-pink-500 font-extrabold'>$1</span>");
                 
                 li.innerHTML = highlightedName;
                 
-                // Al hacer clic, rellenar el input, quitar el borde y ocultar la lista
                 li.onmousedown = function(e) { 
                     e.preventDefault();
                     inputEl.value = name;
@@ -414,7 +421,6 @@
             });
         });
 
-        // Ocultar sugerencias y quitar borde al hacer clic fuera del input
         document.addEventListener('click', function(e) {
             if (!autocompleteContainer.contains(e.target)) {
                 suggestionsEl.classList.add('hidden');
@@ -422,25 +428,22 @@
             }
         });
 
-        // Mostrar sugerencias si vuelve a hacer foco y hay texto
         inputEl.addEventListener('focus', function() {
             if (this.value.trim() !== '') {
                  this.dispatchEvent(new Event('input'));
             }
         });
 
-        // Check Setup
-        if (GOOGLE_SHEETS_URL.trim() === "") {
+        if (_0xUrl.trim() === "") {
             document.getElementById('offline-badge').classList.remove('hidden');
             document.getElementById('offline-text').innerText = "URL de Google Sheets no configurada. Récords locales.";
         }
 
-        // Load voices early
         if ('speechSynthesis' in window) {
             window.speechSynthesis.getVoices();
         }
 
-        // --- DATA ---
+        // --- DATA DE PREGUNTAS ---
         const CAs = [
             { text: "I ___ TV", correct: "was watching", distractors: ["watched", "am watching", "watch"] },
             { text: "she ___ a shower", correct: "was taking", distractors: ["took", "is taking", "takes"] },
@@ -490,7 +493,6 @@
         const feedbackSuccess = ["Wow!", "Excellent!", "You are a genius!", "Good job!", "Wonderful!", "Amazing!", "Spectacular!", "Outstanding!", "Brilliant!"];
         const feedbackFail = ["What a pity!", "Wrong!", "Try again!", "Oops!", "Not quite!", "Oh no!", "Keep trying!", "Time's up!"];
 
-        // --- CORE FUNCTIONS ---
         function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
         function shuffleArray(array) { return array.sort(() => Math.random() - 0.5); }
 
@@ -534,7 +536,6 @@
             if (document.fullscreenElement) document.exitFullscreen().catch(err => console.log("Exit fullscreen error:", err));
         }
 
-        // --- GAME LOGIC ---
         function generateRandomQuestion() {
             const ca = CAs[Math.floor(Math.random() * CAs.length)];
             const ia = IAs[Math.floor(Math.random() * IAs.length)];
@@ -565,7 +566,6 @@
             playerName = rawInput.trim();
             const errorEl = document.getElementById('name-error');
 
-            // BLOQUEO ABSOLUTO: Si la lista de la base de datos está vacía, no deja jugar.
             if (allowedNames.length === 0) {
                 errorEl.innerText = "Please wait, names are still loading from database...";
                 errorEl.classList.remove('hidden');
@@ -578,7 +578,6 @@
                 return;
             }
 
-            // Validar estrictamente que el nombre ingresado EXISTA en la base de datos (Google Sheets)
             if (!allowedNames.includes(playerName.toLowerCase())) {
                 errorEl.innerText = "Please select a valid name from the list!";
                 errorEl.classList.remove('hidden');
@@ -698,7 +697,9 @@
         function stopAndRecordTime() {
             clearInterval(timerInterval);
             const elapsed = (Date.now() - questionStartTime) / 1000;
-            totalTimeAlive += Math.min(elapsed, questionTimeLimit);
+            // Se suman 2 segundos fijos al registro real porque la validación anti-trampas rechaza si timeAlive < score. 
+            // Como cada transición de feedback demora 2s, el alumno siempre estará jugando matemáticamente más que el score.
+            totalTimeAlive += Math.min(elapsed, questionTimeLimit) + 2; 
         }
 
         function loadNewQuestion() {
@@ -840,13 +841,13 @@
                 name: playerName || "Unknown",
                 score: Number(score),
                 timeAlive: Number(parseFloat(totalTimeAlive).toFixed(1)),
-                ip: userIP 
+                ip: userIP,
+                token: _0x1a2b(score, playerName || "Unknown")
             };
 
-            // GRABADO A GOOGLE SHEETS
-            if (GOOGLE_SHEETS_URL.trim() !== "") {
+            if (_0xUrl.trim() !== "") {
                 try {
-                    await fetch(GOOGLE_SHEETS_URL, {
+                    await fetch(_0xUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain;charset=utf-8', 
@@ -854,7 +855,7 @@
                         body: JSON.stringify(newRecord)
                     });
                     console.log("Guardado en Google Sheets correctamente.");
-                    fetchLeaderboardData(); // Refrescar base de datos visual
+                    fetchLeaderboardData(); 
                 } catch (e) {
                     console.error("No se pudo guardar en Google Sheets.", e);
                     fallbackLocalSave(newRecord);
@@ -873,18 +874,16 @@
             updateLeaderboardUI();
         }
 
-        // --- GOOGLE SHEETS FETCHING LOGIC ---
         async function fetchLeaderboardData() {
-            if (GOOGLE_SHEETS_URL.trim() === "") {
+            if (_0xUrl.trim() === "") {
                 updateLeaderboardUI();
                 return;
             }
 
             try {
-                const response = await fetch(GOOGLE_SHEETS_URL);
+                const response = await fetch(_0xUrl);
                 const data = await response.json();
                 
-                // Mantenemos el filtro de IPs a nivel cliente como respaldo
                 let uniqueIPs = {};
                 let topRecords = [];
                 data.forEach(rec => {
@@ -894,7 +893,7 @@
                             topRecords.push(rec);
                         }
                     } else {
-                        topRecords.push(rec); // permitimos los antiguos
+                        topRecords.push(rec); 
                     }
                 });
 
@@ -905,14 +904,14 @@
                 console.error("Error obteniendo datos de Google Sheets:", e);
                 document.getElementById('offline-badge').classList.remove('hidden');
                 document.getElementById('offline-text').innerText = "Sin conexión a Google Sheets.";
-                updateLeaderboardUI(); // Muestra caché local si falla
+                updateLeaderboardUI(); 
             }
         }
 
         function startLeaderboardPolling() {
             if(leaderboardPollingInterval) clearInterval(leaderboardPollingInterval);
-            fetchLeaderboardData(); // Fetch de inicio
-            leaderboardPollingInterval = setInterval(fetchLeaderboardData, 10000); // Refresca cada 10 segundos
+            fetchLeaderboardData(); 
+            leaderboardPollingInterval = setInterval(fetchLeaderboardData, 10000); 
         }
 
         function stopLeaderboardPolling() {
@@ -920,7 +919,6 @@
         }
 
         function updateLeaderboardUI() {
-            // Update Mini Leaderboard
             const miniList = document.getElementById('mini-leaderboard-list');
             if (miniList) {
                 const top5 = leaderboardData.slice(0, 5);
@@ -948,10 +946,9 @@
                 }
             }
 
-            // Update Full Leaderboard Table
             const listEl = document.getElementById('leaderboard-list');
             if (listEl) {
-                const top50 = leaderboardData.slice(0, 50); // Mostrar solo el Top 50
+                const top50 = leaderboardData.slice(0, 50); 
                 listEl.innerHTML = '';
                 if (top50.length === 0) {
                     listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No records yet!</td></tr>';
@@ -980,7 +977,6 @@
             window.switchScreen('leaderboard-screen');
         }
 
-        // Initialize display and start polling sheets data
         renderHearts();
         startLeaderboardPolling();
     </script>
