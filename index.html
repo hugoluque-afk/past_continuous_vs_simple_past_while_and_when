@@ -344,6 +344,9 @@
                     
                     inputEl.placeholder = "Enter your name to start...";
                     inputEl.disabled = false;
+                    
+                    // Actualizar el leaderboard para ocultar alumnos eliminados inmediatamente
+                    updateLeaderboardUI();
                 } else {
                     throw new Error("Invalid format from server");
                 }
@@ -845,7 +848,7 @@
                 score: Number(score),
                 timeAlive: Number(parseFloat(totalTimeAlive).toFixed(1)),
                 ip: userIP,
-                sessionToken: serverSessionToken // Enviamos el ticket secreto de vuelta
+                sessionToken: serverSessionToken 
             };
 
             if (_0xUrl.trim() !== "") {
@@ -919,9 +922,15 @@
         }
 
         function updateLeaderboardUI() {
+            // Filtrar los datos para mostrar solo a los alumnos que AÚN ESTÁN en la lista oficial
+            let validData = leaderboardData;
+            if (allowedNames.length > 0) {
+                validData = leaderboardData.filter(row => allowedNames.includes(row.name.toLowerCase().trim()));
+            }
+
             const miniList = document.getElementById('mini-leaderboard-list');
             if (miniList) {
-                const top5 = leaderboardData.slice(0, 5);
+                const top5 = validData.slice(0, 5);
                 miniList.innerHTML = '';
                 if (top5.length === 0) {
                     miniList.innerHTML = '<p class="text-gray-400 text-center mt-4">No records yet! Be the first!</p>';
@@ -948,7 +957,7 @@
 
             const listEl = document.getElementById('leaderboard-list');
             if (listEl) {
-                const top50 = leaderboardData.slice(0, 50); 
+                const top50 = validData.slice(0, 50); 
                 listEl.innerHTML = '';
                 if (top50.length === 0) {
                     listEl.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">No records yet!</td></tr>';
