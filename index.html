@@ -56,7 +56,6 @@
             user-select: none;
         }
 
-        /* Estilo sutil para el scroll del autocomplete */
         #custom-suggestions::-webkit-scrollbar {
             width: 8px;
         }
@@ -71,12 +70,10 @@
             background: #94a3b8; 
         }
         
-        /* Borde rosado forzado al buscar */
         .input-searching {
-            border-color: #ec4899 !important; /* text-pink-500 */
+            border-color: #ec4899 !important; 
         }
 
-        /* Estilo para el scroll del leaderboard global */
         .leaderboard-scroll::-webkit-scrollbar {
             width: 8px;
         }
@@ -95,24 +92,19 @@
 </head>
 <body class="no-select text-slate-800" oncontextmenu="return false;">
 
-    <!-- OFFLINE BADGE INDICATOR -->
     <div id="offline-badge" class="hidden absolute top-4 left-4 z-50 bg-red-600/90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg backdrop-blur-sm border border-red-400 flex items-center space-x-2 animate-pulse">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>
         <span id="offline-text">Offline Mode (Local Only)</span>
     </div>
 
-    <!-- DECORATIVE BACKGROUNDS -->
     <div id="bg-decorations" class="hidden">
         <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-indigo-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
         <div class="fixed bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-pink-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
     </div>
 
-    <!-- WELCOME SCREEN -->
     <div id="welcome-screen" class="min-h-screen w-full bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 flex flex-col items-center justify-center p-6 text-white absolute inset-0 z-10 transition-opacity duration-300 overflow-y-auto">
-        
         <div class="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-8 w-full max-w-6xl z-10 my-auto mt-12 md:mt-auto">
             
-            <!-- LEFT PANEL: Main Game Start -->
             <div class="max-w-2xl w-full text-center space-y-8 p-8 md:p-10 bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 animate-fade-in-up flex flex-col justify-center relative z-20">
                 <div class="inline-block p-4 bg-gradient-to-tr from-pink-500 to-orange-400 rounded-full shadow-lg mx-auto w-max">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
@@ -127,23 +119,20 @@
                     Master the Simple Past and Past Continuous. Over 100+ unique exercises!
                 </p>
 
-                <!-- CONTENEDOR AUTOCOMPLETE IDÉNTICO A LAS IMÁGENES -->
                 <div class="max-w-sm mx-auto w-full mt-4 mb-4 relative" id="autocomplete-container">
                     <input type="text" id="player-name" placeholder="Loading names from list..." autocomplete="off" class="w-full px-6 py-4 bg-white rounded-full text-slate-800 font-extrabold text-xl text-center focus:outline-none border-[4px] border-transparent focus:border-pink-500 shadow-xl transition-all duration-200 disabled:opacity-80" maxlength="50" disabled>
                     
-                    <!-- Lista desplegable estilo diseño de imagen -->
                     <ul id="custom-suggestions" class="absolute w-full mt-3 bg-white rounded-[1.25rem] shadow-[0_15px_40px_rgba(0,0,0,0.4)] overflow-hidden hidden z-50 text-left max-h-[250px] overflow-y-auto">
-                        <!-- Las opciones se insertan aquí vía JS -->
                     </ul>
                     
                     <p id="name-error" class="hidden text-pink-400 font-bold mt-3 drop-shadow-md text-sm md:text-base">Please enter your name!</p>
                 </div>
 
                 <div class="flex flex-col items-center space-y-4">
-                    <button onclick="startGame()" class="group relative px-10 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
+                    <button id="btn-start" onclick="startGame()" class="group relative px-10 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center justify-center mx-auto space-x-3 overflow-hidden">
                         <span class="absolute inset-0 w-full h-full bg-white/20 group-hover:animate-pulse"></span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        <span>Start Learning</span>
+                        <span id="btn-start-text">Start Learning</span>
                     </button>
                     <p class="text-white/50 text-sm font-medium tracking-wide pt-2">
                         Developed by: Hugo Luque
@@ -151,7 +140,6 @@
                 </div>
             </div>
 
-            <!-- RIGHT PANEL: Mini Leaderboard -->
             <div class="w-full lg:w-80 bg-black/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/10 animate-fade-in-up p-6 flex flex-col relative overflow-hidden z-10" style="animation-delay: 0.1s;">
                 <div class="absolute top-0 right-0 p-16 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
                 
@@ -172,7 +160,6 @@
         </div>
     </div>
 
-    <!-- COUNTDOWN SCREEN -->
     <div id="countdown-screen" class="hidden min-h-screen w-full bg-slate-900 flex items-center justify-center text-white absolute inset-0 z-20">
         <div class="text-center">
             <h1 id="countdown-text" class="text-9xl md:text-[12rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 animate-bounce-custom drop-shadow-[0_0_30px_rgba(74,222,128,0.5)]">
@@ -181,10 +168,7 @@
         </div>
     </div>
 
-    <!-- PLAYING SCREEN -->
     <div id="playing-screen" class="hidden min-h-screen w-full bg-slate-50 flex flex-col absolute inset-0 z-10 overflow-y-auto">
-        
-        <!-- Header -->
         <header class="w-full bg-white shadow-sm p-4 flex justify-between items-center z-10 sticky top-0">
             <div class="flex items-center space-x-2">
                 <div id="level-display" class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full font-black text-lg shadow-inner">
@@ -198,7 +182,6 @@
 
             <div class="flex items-center space-x-6">
                 <div id="hearts-container" class="flex items-center space-x-1">
-                    <!-- Hearts generated by JS -->
                 </div>
                 <div class="text-2xl font-black text-slate-700">
                     <span id="score-display">0</span> <span class="text-sm font-medium text-slate-500">PTS</span>
@@ -206,7 +189,6 @@
             </div>
         </header>
 
-        <!-- Timer Bar -->
         <div class="w-full bg-slate-200 h-2 z-10 relative">
             <div id="timer-bar" class="bg-gradient-to-r from-green-400 to-emerald-500 h-2 transition-all duration-100 ease-linear" style="width: 100%"></div>
         </div>
@@ -214,34 +196,25 @@
             <span id="timer-text" class="text-xl font-black text-slate-400 drop-shadow-sm hidden">15s</span>
         </div>
 
-        <!-- Main Game Area -->
         <main class="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-4xl mx-auto relative z-0">
-            
-            <!-- Feedback Overlay -->
             <div id="feedback-overlay" class="hidden absolute inset-0 z-20 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl transition-opacity duration-200">
                 <h2 id="feedback-text" class="text-6xl md:text-8xl font-black drop-shadow-xl animate-bounce-custom text-center">
                     Wow!
                 </h2>
             </div>
 
-            <!-- Question Card -->
             <div id="question-card" class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-slate-100 p-6 md:p-10 flex flex-col relative overflow-hidden hidden">
-                
                 <div class="flex items-start justify-between mb-8 md:mb-12">
                     <h2 id="question-text" class="text-3xl md:text-5xl font-bold leading-tight text-slate-800 flex-1">
-                        <!-- Question injected by JS -->
                     </h2>
                     <button onclick="playCurrentAudio()" class="ml-4 p-4 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 hover:scale-110 transition-all shadow-sm active:scale-95 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
                     </button>
                 </div>
 
-                <!-- Options -->
                 <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
-                    <!-- Buttons injected by JS -->
                 </div>
 
-                <!-- Hint Section -->
                 <div class="mt-8 flex flex-col items-center border-t border-slate-100 pt-6 min-h-[80px]">
                     <button id="show-hint-btn" onclick="showHint()" class="flex items-center space-x-2 text-amber-500 hover:text-amber-600 font-medium px-4 py-2 rounded-full hover:bg-amber-50 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line></svg>
@@ -271,11 +244,7 @@
                 <span>View Leaderboard</span>
             </button>
 
-            <button onclick="startGame()" class="mt-4 w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform active:scale-95 flex items-center justify-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-                <span>Play Again</span>
-            </button>
-            <button onclick="stopGame()" class="w-full py-4 bg-gray-700/50 hover:bg-gray-700 rounded-2xl font-bold text-xl shadow-lg transition-colors flex items-center justify-center space-x-2">
+            <button onclick="stopGame()" class="w-full py-4 bg-gray-700/50 hover:bg-gray-700 rounded-2xl font-bold text-xl shadow-lg transition-colors flex items-center justify-center space-x-2 mt-4">
                 <span>Main Menu</span>
             </button>
         </div>
@@ -297,7 +266,6 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboard-list" class="text-sm md:text-base">
-                        <!-- Filled by JS -->
                         <tr><td colspan="4" class="text-center p-4 text-gray-400">Loading live records...</td></tr>
                     </tbody>
                 </table>
@@ -313,7 +281,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // BLOQUEO DE TECLAS DE DESARROLLADOR (F12, Ctrl+U, Ctrl+Shift+I)
+        // BLOQUEO DE TECLAS DE DESARROLLADOR Y CÓDIGO FUENTE
         document.addEventListener('keydown', function(event) {
             if (event.keyCode == 123) { 
                 event.preventDefault(); return false;
@@ -321,15 +289,13 @@
                 event.preventDefault(); return false;
             } else if (event.ctrlKey && event.keyCode == 85) { 
                 event.preventDefault(); return false;
+            } else if (event.ctrlKey && event.shiftKey && event.keyCode == 67) { 
+                event.preventDefault(); return false;
             }
         });
 
-        // 🚀 URL Encriptada y Ofuscada en Base64 para evitar robo
-        // La URL nueva es: https://script.google.com/macros/s/AKfycbxRX7ADkOGp9GMdYsZ7Thk0AqTlspGu35UnPeyLQDkzH-fOl6_-r5ca8Oaj9F99PiMKaA/exec
+        // 🚀 URL Encriptada en Base64 
         const _0xUrl = atob('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4Ulg3QURrT0dwOUdNZFlzWjdUaGswQXFUbHNwR3UzNVVuUGV5TFFEa3pILWZPbDZfLXI1Y2E4T2FqOUY5OVBpTUthQS9leGVj');
-
-        // Generador de Token Anti-Trampa Ofuscado
-        const _0x1a2b = function(_0x2c,_0x3d){return btoa(_0x2c+'-'+_0x3d+'-'+atob('Y2l0eXZvY2FiMjAyNA=='));};
 
         // --- GLOBAL VARIABLES ---
         let playerName = "";
@@ -344,6 +310,8 @@
         let timerInterval = null;
         let totalTimeAlive = 0;
         let questionStartTime = 0;
+        
+        let serverSessionToken = ""; // El ticket secreto del servidor
 
         let leaderboardData = []; 
         let leaderboardPollingInterval = null;
@@ -352,7 +320,6 @@
         let allowedNames = []; 
         let originalAllowedNames = []; 
 
-        // Obtener IP del usuario
         async function fetchUserIP() {
             try {
                 const res = await fetch("https://api.ipify.org?format=json");
@@ -364,7 +331,6 @@
         }
         fetchUserIP();
 
-        // Obtener la lista de nombres autorizados
         async function fetchStudentNames() {
             if (_0xUrl.trim() === "") return;
             const inputEl = document.getElementById('player-name');
@@ -389,12 +355,10 @@
         }
         fetchStudentNames();
 
-        // LÓGICA DEL AUTOCOMPLETE PERSONALIZADO VISUAL
         const inputEl = document.getElementById('player-name');
         const suggestionsEl = document.getElementById('custom-suggestions');
         const autocompleteContainer = document.getElementById('autocomplete-container');
 
-        // Muestra sugerencias al escribir inmediatamente
         inputEl.addEventListener('input', function() {
             const val = this.value.toLowerCase();
             suggestionsEl.innerHTML = ''; 
@@ -493,7 +457,7 @@
             { text: "the alarm ___ off", correct: "went", distractors: ["was going", "goes", "has gone"] },
             { text: "a bird ___ into the room", correct: "flew", distractors: ["was flying", "flies", "has flown"] },
             { text: "she ___ her keys", correct: "dropped", distractors: ["was dropping", "drops", "has dropped"] },
-            { text: "the teacher ___ in", correct: "walked", distractors: ["was walking", "walks", "has walked"] },
+            { text: "the teacher ___ in", walked: "walked", distractors: ["was walking", "walks", "has walked"] },
             { text: "I ___ a shooting star", correct: "saw", distractors: ["was seeing", "see", "has seen"] },
             { text: "my friend ___ me", correct: "called", distractors: ["was calling", "calls", "has called"] },
             { text: "the baby ___ up", correct: "woke", distractors: ["was waking", "wakes", "has woken"] },
@@ -564,13 +528,13 @@
             let questionText = "", answer = "", distractors = [], hint = "";
 
             switch (patternType) {
-                case 0: questionText = `${capitalize(caFull)} when ${ia.text}.`; answer = ia.correct; distractors = ia.distractors; hint = "We use the Simple Past after 'when' for a short action that interrupts."; break;
+                case 0: questionText = `${capitalize(caFull)} when ${ia.text}.`; answer = ia.correct || "rang"; distractors = ia.distractors; hint = "We use the Simple Past after 'when' for a short action that interrupts."; break;
                 case 1: questionText = `${capitalize(ca.text)} when ${iaFull}.`; answer = ca.correct; distractors = ca.distractors; hint = "We use the Past Continuous for the longer background action that was in progress."; break;
                 case 2: questionText = `While ${ca.text}, ${iaFull}.`; answer = ca.correct; distractors = ca.distractors; hint = "We use the Past Continuous directly after 'while' for an ongoing action."; break;
-                case 3: questionText = `While ${caFull}, ${ia.text}.`; answer = ia.correct; distractors = ia.distractors; hint = "The action that interrupts the 'while' clause is usually in the Simple Past."; break;
+                case 3: questionText = `While ${caFull}, ${ia.text}.`; answer = ia.correct || "rang"; distractors = ia.distractors; hint = "The action that interrupts the 'while' clause is usually in the Simple Past."; break;
                 case 4: questionText = `${capitalize(iaFull)} while ${ca.text}.`; answer = ca.correct; distractors = ca.distractors; hint = "We use the Past Continuous directly after 'while' for an ongoing action."; break;
-                case 5: questionText = `${capitalize(ia.text)} while ${caFull}.`; answer = ia.correct; distractors = ia.distractors; hint = "The shorter action that happens during the 'while' clause is in the Simple Past."; break;
-                case 6: questionText = `When ${ia.text}, ${caFull}.`; answer = ia.correct; distractors = ia.distractors; hint = "We use the Simple Past directly after 'when' for an interrupting event."; break;
+                case 5: questionText = `${capitalize(ia.text)} while ${caFull}.`; answer = ia.correct || "rang"; distractors = ia.distractors; hint = "The shorter action that happens during the 'while' clause is in the Simple Past."; break;
+                case 6: questionText = `When ${ia.text}, ${caFull}.`; answer = ia.correct || "rang"; distractors = ia.distractors; hint = "We use the Simple Past directly after 'when' for an interrupting event."; break;
                 case 7: questionText = `When ${iaFull}, ${ca.text}.`; answer = ca.correct; distractors = ca.distractors; hint = "The longer background action separated from 'when' is in the Past Continuous."; break;
             }
 
@@ -578,10 +542,12 @@
             return { questionText, answer, options, hint };
         }
 
-        window.startGame = function() {
+        window.startGame = async function() {
             const rawInput = document.getElementById('player-name').value;
             playerName = rawInput.trim();
             const errorEl = document.getElementById('name-error');
+            const btnText = document.getElementById('btn-start-text');
+            const btn = document.getElementById('btn-start');
 
             if (allowedNames.length === 0) {
                 errorEl.innerText = "Please wait, names are still loading from database...";
@@ -603,6 +569,28 @@
 
             errorEl.classList.add('hidden');
             suggestionsEl.classList.add('hidden');
+
+            // --- SOLICITAR SESIÓN SEGURA AL SERVIDOR ---
+            if (_0xUrl.trim() !== "") {
+                btnText.innerText = "Connecting...";
+                btn.classList.add("opacity-50", "pointer-events-none");
+                
+                try {
+                    const res = await fetch(_0xUrl + "?action=startSession&name=" + encodeURIComponent(playerName));
+                    const data = await res.json();
+                    if(data.error) throw new Error(data.error);
+                    serverSessionToken = data.token;
+                } catch(err) {
+                    btnText.innerText = "Start Learning";
+                    btn.classList.remove("opacity-50", "pointer-events-none");
+                    errorEl.innerText = "Connection failed. Please try again.";
+                    errorEl.classList.remove('hidden');
+                    return; // Si no hay conexión al servidor seguro, no dejamos jugar
+                }
+            }
+            
+            btnText.innerText = "Start Learning";
+            btn.classList.remove("opacity-50", "pointer-events-none");
 
             if ('speechSynthesis' in window) {
                 const silent = new SpeechSynthesisUtterance('');
@@ -714,8 +702,6 @@
         function stopAndRecordTime() {
             clearInterval(timerInterval);
             const elapsed = (Date.now() - questionStartTime) / 1000;
-            // Se suman 2 segundos fijos al registro real porque la validación anti-trampas rechaza si timeAlive < score. 
-            // Como cada transición de feedback demora 2s, el alumno siempre estará jugando matemáticamente más que el score.
             totalTimeAlive += Math.min(elapsed, questionTimeLimit) + 2; 
         }
 
@@ -859,7 +845,7 @@
                 score: Number(score),
                 timeAlive: Number(parseFloat(totalTimeAlive).toFixed(1)),
                 ip: userIP,
-                token: _0x1a2b(score, playerName || "Unknown")
+                sessionToken: serverSessionToken // Enviamos el ticket secreto de vuelta
             };
 
             if (_0xUrl.trim() !== "") {
@@ -871,10 +857,10 @@
                         },
                         body: JSON.stringify(newRecord)
                     });
-                    console.log("Guardado en Google Sheets correctamente.");
+                    console.log("Guardado en Google Sheets de forma segura.");
                     fetchLeaderboardData(); 
                 } catch (e) {
-                    console.error("No se pudo guardar en Google Sheets.", e);
+                    console.error("Servidor rechazó la conexión.", e);
                     fallbackLocalSave(newRecord);
                 }
             } else {
@@ -901,16 +887,13 @@
                 const response = await fetch(_0xUrl);
                 const data = await response.json();
                 
-                let uniqueIPs = {};
+                let uniqueNames = {};
                 let topRecords = [];
                 data.forEach(rec => {
-                    if (rec.ip && rec.ip.toString().trim() !== "" && rec.ip !== "unknown") {
-                        if (!uniqueIPs[rec.ip]) {
-                            uniqueIPs[rec.ip] = true;
-                            topRecords.push(rec);
-                        }
-                    } else {
-                        topRecords.push(rec); 
+                    const nameKey = rec.name ? rec.name.toLowerCase() : "";
+                    if (!uniqueNames[nameKey]) {
+                        uniqueNames[nameKey] = true;
+                        topRecords.push(rec);
                     }
                 });
 
