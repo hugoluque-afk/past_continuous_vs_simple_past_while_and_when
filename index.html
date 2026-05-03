@@ -237,7 +237,7 @@
             <h1 class="text-5xl font-black text-red-500 drop-shadow-md">Game Over</h1>
             <p class="text-2xl text-gray-300">Level Reached: <span id="final-level" class="font-bold text-white">1</span></p>
             <p class="text-2xl text-gray-300">Final Score: <span id="final-score" class="font-bold text-white">0</span></p>
-            <p class="text-xl text-gray-400">Total Time Alive: <span id="final-time" class="font-bold text-white">0</span>s</p>
+            <p class="text-xl text-gray-400">Time: <span id="final-time" class="font-bold text-white">0</span>s</p>
             
             <button onclick="showLeaderboard('gameover-screen')" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform active:scale-95 flex items-center justify-center space-x-2 mt-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"></path><path d="M5 20V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"></path><path d="M9 20V12h6v8"></path></svg>
@@ -294,8 +294,8 @@
             }
         });
 
-        // 🚀 URL Encriptada en Base64 
-        const _0xUrl = atob('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4Ulg3QURrT0dwOUdNZFlzWjdUaGswQXFUbHNwR3UzNVVuUGV5TFFEa3pILWZPbDZfLXI1Y2E4T2FqOUY5OVBpTUthQS9leGVj');
+        // 🚀 PEGA AQUÍ TU NUEVA URL DEL GOOGLE APPS SCRIPT
+        const GOOGLE_SHEETS_URL = "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION"; 
 
         // --- GLOBAL VARIABLES ---
         let playerName = "";
@@ -332,11 +332,11 @@
         fetchUserIP();
 
         async function fetchStudentNames() {
-            if (_0xUrl.trim() === "") return;
+            if (GOOGLE_SHEETS_URL.trim() === "" || GOOGLE_SHEETS_URL === "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") return;
             const inputEl = document.getElementById('player-name');
             
             try {
-                const response = await fetch(_0xUrl + "?action=getNames");
+                const response = await fetch(GOOGLE_SHEETS_URL + "?action=getNames");
                 const names = await response.json();
                 if (Array.isArray(names)) {
                     originalAllowedNames = names.map(n => n.trim());
@@ -345,7 +345,6 @@
                     inputEl.placeholder = "Enter your name to start...";
                     inputEl.disabled = false;
                     
-                    // Actualizar el leaderboard para ocultar alumnos eliminados inmediatamente
                     updateLeaderboardUI();
                 } else {
                     throw new Error("Invalid format from server");
@@ -418,9 +417,9 @@
             }
         });
 
-        if (_0xUrl.trim() === "") {
+        if (GOOGLE_SHEETS_URL.trim() === "" || GOOGLE_SHEETS_URL === "https://script.google.com/macros/s/AKfycbx-jyrPeCEtkQkSsdF-t5D7WmKYf0nZcv8GRxDqewehVNG4_EYu7_SufCUtGJwV-kEHfQ/exec") {
             document.getElementById('offline-badge').classList.remove('hidden');
-            document.getElementById('offline-text').innerText = "URL de Google Sheets no configurada. Récords locales.";
+            document.getElementById('offline-text').innerText = "Configure URL en línea 402";
         }
 
         if ('speechSynthesis' in window) {
@@ -574,12 +573,12 @@
             suggestionsEl.classList.add('hidden');
 
             // --- SOLICITAR SESIÓN SEGURA AL SERVIDOR ---
-            if (_0xUrl.trim() !== "") {
+            if (GOOGLE_SHEETS_URL.trim() !== "" && GOOGLE_SHEETS_URL !== "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") {
                 btnText.innerText = "Connecting...";
                 btn.classList.add("opacity-50", "pointer-events-none");
                 
                 try {
-                    const res = await fetch(_0xUrl + "?action=startSession&name=" + encodeURIComponent(playerName));
+                    const res = await fetch(GOOGLE_SHEETS_URL + "?action=startSession&name=" + encodeURIComponent(playerName));
                     const data = await res.json();
                     if(data.error) throw new Error(data.error);
                     serverSessionToken = data.token;
@@ -588,7 +587,7 @@
                     btn.classList.remove("opacity-50", "pointer-events-none");
                     errorEl.innerText = "Connection failed. Please try again.";
                     errorEl.classList.remove('hidden');
-                    return; // Si no hay conexión al servidor seguro, no dejamos jugar
+                    return; 
                 }
             }
             
@@ -606,7 +605,6 @@
             score = 0;
             lives = 5;
             level = 1;
-            totalTimeAlive = 0;
             updateUI();
 
             window.switchScreen('countdown-screen');
@@ -702,12 +700,6 @@
             }, 50);
         }
 
-        function stopAndRecordTime() {
-            clearInterval(timerInterval);
-            const elapsed = (Date.now() - questionStartTime) / 1000;
-            totalTimeAlive += Math.min(elapsed, questionTimeLimit) + 2; 
-        }
-
         function loadNewQuestion() {
             currentQ = generateRandomQuestion();
             isProcessing = false;
@@ -753,7 +745,7 @@
         window.handleAnswer = function(selectedOption, buttonElement) {
             if (isProcessing) return;
             isProcessing = true;
-            stopAndRecordTime();
+            clearInterval(timerInterval);
 
             const buttons = document.getElementById('options-container').querySelectorAll('button');
             buttons.forEach(b => {
@@ -805,7 +797,7 @@
         function handleTimeout() {
             if (isProcessing) return;
             isProcessing = true;
-            stopAndRecordTime();
+            clearInterval(timerInterval);
             
             const buttons = document.getElementById('options-container').querySelectorAll('button');
             buttons.forEach(b => {
@@ -838,7 +830,8 @@
         async function gameOver() {
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-level').innerText = level;
-            document.getElementById('final-time').innerText = totalTimeAlive.toFixed(1);
+            // El front-end ya no calcula el tiempo que duró. Dejamos que el servidor lo haga.
+            document.getElementById('final-time').innerText = "???";
             
             window.switchScreen('gameover-screen');
             speak("Game Over. You did your best!");
@@ -846,14 +839,13 @@
             const newRecord = {
                 name: playerName || "Unknown",
                 score: Number(score),
-                timeAlive: Number(parseFloat(totalTimeAlive).toFixed(1)),
                 ip: userIP,
                 sessionToken: serverSessionToken 
             };
 
-            if (_0xUrl.trim() !== "") {
+            if (GOOGLE_SHEETS_URL.trim() !== "" && GOOGLE_SHEETS_URL !== "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") {
                 try {
-                    await fetch(_0xUrl, {
+                    await fetch(GOOGLE_SHEETS_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain;charset=utf-8', 
@@ -872,7 +864,7 @@
         }
 
         function fallbackLocalSave(newRecord) {
-            leaderboardData.push(newRecord);
+            leaderboardData.push({...newRecord, timeAlive: 0});
             leaderboardData.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
                 return a.timeAlive - b.timeAlive; 
@@ -881,13 +873,13 @@
         }
 
         async function fetchLeaderboardData() {
-            if (_0xUrl.trim() === "") {
+            if (GOOGLE_SHEETS_URL.trim() === "" || GOOGLE_SHEETS_URL === "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") {
                 updateLeaderboardUI();
                 return;
             }
 
             try {
-                const response = await fetch(_0xUrl);
+                const response = await fetch(GOOGLE_SHEETS_URL);
                 const data = await response.json();
                 
                 let uniqueNames = {};
@@ -922,7 +914,6 @@
         }
 
         function updateLeaderboardUI() {
-            // Filtrar los datos para mostrar solo a los alumnos que AÚN ESTÁN en la lista oficial
             let validData = leaderboardData;
             if (allowedNames.length > 0) {
                 validData = leaderboardData.filter(row => allowedNames.includes(row.name.toLowerCase().trim()));
