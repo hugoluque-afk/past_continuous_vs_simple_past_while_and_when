@@ -294,8 +294,8 @@
             }
         });
 
-        // 🚀 PEGA AQUÍ TU NUEVA URL DEL GOOGLE APPS SCRIPT
-        const GOOGLE_SHEETS_URL = "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION"; 
+        // 🚀 URL ENCRIPTADA 
+        const _0xUrl = atob("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4Ulg3QURrT0dwOUdNZFlzWjdUaGswQXFUbHNwR3UzNVVuUGV5TFFEa3pILWZPbDZfLXI1Y2E4T2FqOUY5OVBpTUthQS9leGVj");
 
         // --- GLOBAL VARIABLES ---
         let playerName = "";
@@ -311,7 +311,7 @@
         let totalTimeAlive = 0;
         let questionStartTime = 0;
         
-        let serverSessionToken = ""; // El ticket secreto del servidor
+        let serverSessionToken = ""; 
 
         let leaderboardData = []; 
         let leaderboardPollingInterval = null;
@@ -332,11 +332,11 @@
         fetchUserIP();
 
         async function fetchStudentNames() {
-            if (GOOGLE_SHEETS_URL.trim() === "" || GOOGLE_SHEETS_URL === "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") return;
+            if (!_0xUrl || _0xUrl.trim() === "") return;
             const inputEl = document.getElementById('player-name');
             
             try {
-                const response = await fetch(GOOGLE_SHEETS_URL + "?action=getNames");
+                const response = await fetch(_0xUrl + "?action=getNames");
                 const names = await response.json();
                 if (Array.isArray(names)) {
                     originalAllowedNames = names.map(n => n.trim());
@@ -417,7 +417,7 @@
             }
         });
 
-        if (GOOGLE_SHEETS_URL.trim() === "" || GOOGLE_SHEETS_URL === "https://script.google.com/macros/s/AKfycbx-jyrPeCEtkQkSsdF-t5D7WmKYf0nZcv8GRxDqewehVNG4_EYu7_SufCUtGJwV-kEHfQ/exec") {
+        if (!_0xUrl || _0xUrl.trim() === "") {
             document.getElementById('offline-badge').classList.remove('hidden');
             document.getElementById('offline-text').innerText = "Configure URL en línea 402";
         }
@@ -573,12 +573,12 @@
             suggestionsEl.classList.add('hidden');
 
             // --- SOLICITAR SESIÓN SEGURA AL SERVIDOR ---
-            if (GOOGLE_SHEETS_URL.trim() !== "" && GOOGLE_SHEETS_URL !== "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") {
+            if (_0xUrl && _0xUrl.trim() !== "") {
                 btnText.innerText = "Connecting...";
                 btn.classList.add("opacity-50", "pointer-events-none");
                 
                 try {
-                    const res = await fetch(GOOGLE_SHEETS_URL + "?action=startSession&name=" + encodeURIComponent(playerName));
+                    const res = await fetch(_0xUrl + "?action=startSession&name=" + encodeURIComponent(playerName));
                     const data = await res.json();
                     if(data.error) throw new Error(data.error);
                     serverSessionToken = data.token;
@@ -830,7 +830,7 @@
         async function gameOver() {
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-level').innerText = level;
-            // El front-end ya no calcula el tiempo que duró. Dejamos que el servidor lo haga.
+            
             document.getElementById('final-time').innerText = "???";
             
             window.switchScreen('gameover-screen');
@@ -843,9 +843,9 @@
                 sessionToken: serverSessionToken 
             };
 
-            if (GOOGLE_SHEETS_URL.trim() !== "" && GOOGLE_SHEETS_URL !== "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") {
+            if (_0xUrl && _0xUrl.trim() !== "") {
                 try {
-                    await fetch(GOOGLE_SHEETS_URL, {
+                    await fetch(_0xUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'text/plain;charset=utf-8', 
@@ -873,13 +873,13 @@
         }
 
         async function fetchLeaderboardData() {
-            if (GOOGLE_SHEETS_URL.trim() === "" || GOOGLE_SHEETS_URL === "AQUI_TU_NUEVA_URL_DE_IMPLEMENTACION") {
+            if (!_0xUrl || _0xUrl.trim() === "") {
                 updateLeaderboardUI();
                 return;
             }
 
             try {
-                const response = await fetch(GOOGLE_SHEETS_URL);
+                const response = await fetch(_0xUrl);
                 const data = await response.json();
                 
                 let uniqueNames = {};
